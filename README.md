@@ -17,4 +17,4 @@ https://github.com/NVlabs/gnn-decoder/blob/master/gnn.py#L233
 
 - Error Correcting Code Transformer model
 
-https://github.com/yoniLc/ECCT/blob/main/Model.py
+[https://github.com/yoniLc/ECCT/blob/main/Model.py](https://github.com/yoniLc/ECCT/blob/main/Model.py#L106)
