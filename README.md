@@ -18,3 +18,7 @@ https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.nn.
 - Error Correcting Code Transformer model
 
 [https://github.com/yoniLc/ECCT/blob/main/Model.py](https://github.com/yoniLc/ECCT/blob/main/Model.py#L106)
+
+- Creating Message Passing GNN
+
+https://pytorch-geometric.readthedocs.io/en/latest/tutorial/create_gnn.html
