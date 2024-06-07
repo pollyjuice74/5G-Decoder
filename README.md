@@ -13,7 +13,7 @@ https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.nn.
 
 - GNN BP Decoder model
 
-https://github.com/NVlabs/gnn-decoder/blob/master/gnn.py#L233
+[https://github.com/NVlabs/gnn-decoder/blob/master/gnn.py#L233](https://github.com/NVlabs/gnn-decoder/blob/master/gnn.py#L67)
 
 - Error Correcting Code Transformer model
 
