@@ -22,3 +22,10 @@ https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.nn.
 - Creating Message Passing GNN
 
 https://pytorch-geometric.readthedocs.io/en/latest/tutorial/create_gnn.html
+
+
+## Extra links
+
+- Performers
+
+https://arxiv.org/abs/2009.14794
