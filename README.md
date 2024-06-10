@@ -11,6 +11,10 @@
 
 https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.nn.conv.GPSConv.html#torch_geometric.nn.conv.GPSConv
 
+- Graph Diffusion
+
+https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.transforms.GDC.html?highlight=diffusion
+
 - GNN BP Decoder model
 
 [https://github.com/NVlabs/gnn-decoder/blob/master/gnn.py#L233](https://github.com/NVlabs/gnn-decoder/blob/master/gnn.py#L67)
