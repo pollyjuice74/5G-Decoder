@@ -1,7 +1,7 @@
-import torch
-import torch.nn.functional as F
-from torch_geometric.nn import GPSConv
-from torch_geometric.data import Data
+# import torch
+# import torch.nn.functional as F
+# from torch_geometric.nn import GPSConv
+# from torch_geometric.data import Data
 
 import tensorflow as tf
 import numpy as np
