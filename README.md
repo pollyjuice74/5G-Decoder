@@ -7,9 +7,9 @@
 
 ### Most important source code on how LDPC is constructed
 
-[LDPC5GEncoder](https://nvlabs.github.io/sionna/api/fec.ldpc.html#sionna.fec.ldpc.encoding.LDPC5GEncoder)
+[LDPC5GEncoder](https://nvlabs.github.io/sionna/api/fec.ldpc.html#sionna.fec.ldpc.encoding.LDPC5GEncoder) Docs
 
-https://nvlabs.github.io/sionna/_modules/sionna/fec/ldpc/encoding.html#LDPC5GEncoder
+https://nvlabs.github.io/sionna/_modules/sionna/fec/ldpc/encoding.html#LDPC5GEncoder Source Code
 
 --- 
 
