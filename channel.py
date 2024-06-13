@@ -6,6 +6,15 @@ from torch_geometric.data import Data
 import tensorflow as tf
 import numpy as np
 
+import sionna as sn
+from sionna.utils import BitErrorRate, BinarySource
+from sionna.mapping import Mapper, Demapper
+from sionna.channel import AWGN
+from sionna.fec.ldpc import LDPCBPDecoder
+from sionna.fec.ldpc.encoding import LDPC5GEncoder
+from sionna.fec.ldpc.decoding import LDPC5GDecoder
+
+
 
 class E2EModel(tf.keras.Model):
     """End-to-end model for (GNN-)decoder evaluation.
@@ -53,11 +62,14 @@ class E2EModel(tf.keras.Model):
             the codeword bits.
     """
 
-    def __init__(self, encoder, decoder, k, n, return_infobits=False, es_no=False):
+    def __init__(self, encoder, decoder, model, 
+                       return_infobits=False,
+                       es_no=False, 
+                       decoder_active=False):        
         super().__init__()
 
-        self._n = n
-        self._k = k
+        self._n = encoder._n
+        self._k = encoder._k
 
         self._binary_source = BinarySource()
         self._num_bits_per_symbol = 2
@@ -66,8 +78,8 @@ class E2EModel(tf.keras.Model):
         self._channel = AWGN() #
         self._decoder = decoder
         self._encoder = encoder
-        self._return_infobits = return_infobits
-        self._es_no = es_no
+        # self._return_infobits = return_infobits
+        # self._es_no = es_no
 
     @tf.function(jit_compile=True)
     def call(self, batch_size, ebno_db):
