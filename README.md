@@ -5,6 +5,14 @@
 - Create channel using Sionna
 - Create model with (i) positional encoding, (ii) local message-passing, (iii) global attention
 
+### Most important source code on how LDPC is constructed
+
+[LDPC5GEncoder](https://nvlabs.github.io/sionna/api/fec.ldpc.html#sionna.fec.ldpc.encoding.LDPC5GEncoder)
+
+https://nvlabs.github.io/sionna/_modules/sionna/fec/ldpc/encoding.html#LDPC5GEncoder
+
+--- 
+
 ## Resources
 
 - General, powerful, scalable graph transformer layer
