@@ -18,6 +18,10 @@ import numpy as np
     # By simulating channel it will try to come up with ways to fool discriminator/decoder
     # through noising the original codeword
 
+    # Could make a general generator for GNN, ECCT, DDECCT, and AECC(Adversarial Error Correcting Code) 
+    # to compare how different models learn or have weaknesses in decoding. 
+
+
 # Construct discriminator (decoder using reverse diffusion)
     # Will have to come up with ways to try to decode the noised codeword against specific noise
     # that will be trying to fool it. 
