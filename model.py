@@ -9,6 +9,10 @@ import numpy as np
 ## Generative Adversarial Network approach
 
 # Should  use specifically 5G standard LDPC/Polar codes
+    # Main algorithms for,
+        # LDPC: Belief Propagation
+        # Polar: Successive Cancellation Listing, Successive Cancellation
+
 
 # Construct generator (encoder using forward diffusion to simulate channel)
     # By simulating channel it will try to come up with ways to fool discriminator/decoder
