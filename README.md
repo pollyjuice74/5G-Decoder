@@ -17,6 +17,10 @@ https://nvlabs.github.io/sionna/_modules/sionna/fec/ldpc/encoding.html#LDPC5GEnc
 
 --- 
 
+- Generative Adversarial Network variants
+
+https://github.com/hwalsuklee/tensorflow-generative-model-collections/tree/master 
+
 - General, powerful, scalable graph transformer layer
 
 https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.nn.conv.GPSConv.html#torch_geometric.nn.conv.GPSConv
