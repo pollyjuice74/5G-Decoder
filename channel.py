@@ -16,28 +16,34 @@ from sionna.fec.ldpc.decoding import LDPC5GDecoder
 
 
 class E2EModelDDECC(tf.keras.Model):
-    def __init__(self, encoder, decoder,  
+    def __init__(self, model, 
                        batch_size=1, 
                        return_infobits=False,
                        es_no=False, 
                        decoder_active=False):        
         super().__init__()
 
-        self._n = encoder._n
-        self._k = encoder._k
+        self._n = model.encoder._n
+        self._k = model.encoder._k
 
         self._binary_source = BinarySource()
         self._num_bits_per_symbol = 4 # QAM16
         
         # Channel
         ############################
-        self._encoder = encoder
+        # Encoding
+        self._encoder = model.encoder
         self._mapper = Mapper("qam", self._num_bits_per_symbol) #
 
+        # Channel
         self._channel = AWGN() #
+        # adversarial channel noise emulator
         
+        # Decoding
         self._demapper = Demapper("app", "qam", self._num_bits_per_symbol) #
-        self._decoder = decoder # DDECCT
+        # Decoders
+        self._decoder = model # DDECCT
+        self._decoder5g = model.decoder 
         ############################
 
         self._return_infobits = return_infobits
@@ -64,7 +70,7 @@ class E2EModelDDECC(tf.keras.Model):
         b = self._binary_source([self._batch_size, self._encoder._k]) # (batch_size, k), k information bits
         print("bit: ", b.shape) # print(b.shape[-1]==self._k, b.shape, self._k, self._n - self._k)
 
-        # Encode info bits to codeword
+        # Turns INFO BITS (batch_size, k) -> (batch_size, n) info and parity bits CODEWORD of rate = k/n
         if self._encoder is not None:
             c = self._encoder(b) ##### c = G @ b.T, (n,k) @ (k,1)
         else:
