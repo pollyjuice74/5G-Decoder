@@ -13,6 +13,8 @@ import numpy as np
         # LDPC: Belief Propagation
         # Polar: Successive Cancellation Listing, Successive Cancellation
 
+    # Could store different weights for generator and discriminator, 
+    # make a super noise generator that will always attack really good at the discriminator 
 
 # Construct generator (encoder using forward diffusion to simulate channel)
     # By simulating channel it will try to come up with ways to fool discriminator/decoder
