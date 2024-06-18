@@ -15,10 +15,6 @@ from sionna.fec.ldpc.encoding import LDPC5GEncoder
 from sionna.fec.ldpc.decoding import LDPC5GDecoder
 
 
-
-
-
-
 class E2EModelDDECC(tf.keras.Model):
     def __init__(self, encoder, decoder,  
                        batch_size=1, 
