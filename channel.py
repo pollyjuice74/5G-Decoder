@@ -31,7 +31,6 @@ class E2EModelDDECC(tf.keras.Model):
         
         # Channel
         ############################
-        self.build_enc = True
         self._encoder = encoder
         self._mapper = Mapper("qam", self._num_bits_per_symbol) #
 
@@ -67,12 +66,7 @@ class E2EModelDDECC(tf.keras.Model):
 
         # Encode info bits to codeword
         if self._encoder is not None:
-            # Build encoder
-            if self.build_enc:
-              self._encoder.build(b.shape) 
-              self.build_enc = False
-
-            c = self._encoder(b) ##### c = G @ b.T, (n_ldpc,k) @ (k,1)
+            c = self._encoder(b) ##### c = G @ b.T, (n,k) @ (k,1)
         else:
             c = b
 
@@ -90,7 +84,7 @@ class E2EModelDDECC(tf.keras.Model):
         # Channel
         ############################
         x = self._mapper(c_pad)
-        y = self._channel([x, no]) #
+        y = self._channel([x, no]) ###
         llr = self._demapper([y, no])
         ############################
         print("y, no: ", y.shape, no.shape)
