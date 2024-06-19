@@ -869,7 +869,7 @@ class LDPCBPDecoder(Layer):
                                   self._num_vns,
                                   'Last dimension must be of length n.')
 
-        llr_ch_shape = llr_ch.shape.as_list()
+        llr_ch_shape = llr_ch.shape
         new_shape = [-1, self._num_vns]
         llr_ch_reshaped = tf.reshape(llr_ch, new_shape)
 
@@ -1282,7 +1282,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
 
         tf.debugging.assert_type(llr_ch, self.dtype, 'Invalid input dtype.')
 
-        llr_ch_shape = llr_ch.shape.as_list()
+        llr_ch_shape = llr_ch.shape
         new_shape = [-1, llr_ch_shape[-1]]
         llr_ch_reshaped = tf.reshape(llr_ch, new_shape)
         batch_size = tf.shape(llr_ch_reshaped)[0]
