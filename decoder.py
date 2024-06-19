@@ -976,7 +976,7 @@ class LDPCBPDecoder(Layer):
             x_hat = tf.cast(tf.less(0.0, x_hat), self._output_dtype)
 
         # Reshape c_short so that it matches the original input dimensions
-        output_shape = llr_ch_shape
+        output_shape = list(llr_ch_shape)
         output_shape[0] = -1 # overwrite batch dim (can be None in Keras)
 
         x_reshaped = tf.reshape(x_hat, output_shape)
