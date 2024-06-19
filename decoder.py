@@ -1386,10 +1386,12 @@ class LDPC5GDecoder(LDPCBPDecoder):
             # overwrite first dimension as this could be None (Keras)
             llr_ch_shape[0] = -1
             x_short= tf.reshape(x_short, llr_ch_shape)
+            print("x_short: ", x_short.shape)
 
             # enable other output datatypes than tf.float32
             x_out = tf.cast(x_short, self._output_dtype)
-
+            print("x_out: ", x_out.shape)
+            
             if not self._stateful:
                 return x_out
             else:
