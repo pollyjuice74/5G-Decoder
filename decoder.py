@@ -1318,19 +1318,25 @@ class LDPC5GDecoder(LDPCBPDecoder):
         # undo shortening (= add 0 positions after k bits, i.e. LLR=LLR_max)
         # the first k positions are the systematic bits
         x1 = tf.slice(llr_5g, [0,0], [batch_size, self.encoder.k])
+        print("x1: ", x1.shape)
 
         # parity part
         nb_par_bits = (self.encoder.n_ldpc - k_filler
                        - self.encoder.k - self._nb_pruned_nodes)
+        print("nb_par_bits: ",nb_par_bits)
+        
         x2 = tf.slice(llr_5g,
                       [0, self.encoder.k],
                       [batch_size, nb_par_bits])
+        print("x2: ", x2.shape)
 
         # negative sign due to logit definition
         z = -tf.cast(self._llr_max, self._output_dtype) \
             * tf.ones([batch_size, k_filler], self._output_dtype)
+        print("z: ", z.shape)
 
         llr_5g = tf.concat([x1, z, x2], 1)
+        print("llr_5g: ", llr_5g.shape)
 
         # and execute the decoder
         if not self._stateful:
@@ -1341,14 +1347,18 @@ class LDPC5GDecoder(LDPCBPDecoder):
         if self._return_infobits: # return only info bits
             # reconstruct u_hat # code is systematic
             u_hat = tf.slice(x_hat, [0,0], [batch_size, self.encoder.k])
+            print("x_hat: ", x_hat.shape)
+            print("u_hat: ", u_hat.shape)
             # Reshape u_hat so that it matches the original input dimensions
             output_shape = list(llr_ch_shape[0:-1]) + [self.encoder.k]
             # overwrite first dimension as this could be None (Keras)
             output_shape[0] = -1
             u_reshaped = tf.reshape(u_hat, output_shape)
+            print("u_reshaped: ", u_reshaped.shape)
 
             # enable other output datatypes than tf.float32
             u_out = tf.cast(u_reshaped, self._output_dtype)
+            print("u_out: ", u_out.shape)
 
             if not self._stateful:
                 return u_out
@@ -1361,6 +1371,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
 
             # remove last dim
             x = tf.reshape(x_hat, [batch_size, self._n_pruned])
+            print("x: ", x.shape)
 
             # remove filler bits at pos (k, k_ldpc)
             x_no_filler1 = tf.slice(x, [0, 0], [batch_size, self.encoder.k])
@@ -1369,8 +1380,11 @@ class LDPC5GDecoder(LDPCBPDecoder):
                                     [0, self.encoder.k_ldpc],
                                     [batch_size,
                                     self._n_pruned-self.encoder.k_ldpc])
+            print("x_no_filler1: ", x_no_filler1.shape) 
+            print("x_no_filler2: ", x_no_filler2.shape) 
 
             x_no_filler = tf.concat([x_no_filler1, x_no_filler2], 1)
+            print("x_no_filler: ", x_no_filler.shape) 
 
             # shorten the first 2*Z positions and end after n bits
             x_short = tf.slice(x_no_filler,
