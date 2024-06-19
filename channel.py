@@ -4,6 +4,7 @@
 # from torch_geometric.data import Data
 
 import tensorflow as tf
+import torch
 import numpy as np
 
 import sionna as sn
