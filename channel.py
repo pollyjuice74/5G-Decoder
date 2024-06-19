@@ -7,7 +7,7 @@ import tensorflow as tf
 import numpy as np
 
 import sionna as sn
-from sionna.utils import BitErrorRate, BinarySource
+from sionna.utils import BitErrorRate, BinarySource, ebnodb2no
 from sionna.mapping import Mapper, Demapper
 from sionna.channel import AWGN
 from sionna.fec.ldpc import LDPCBPDecoder
