@@ -1279,6 +1279,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
             llr_ch, msg_vn = inputs
         else:
             llr_ch = inputs
+        print("llr_ch: ", llr_ch.shape)
 
         tf.debugging.assert_type(llr_ch, self.dtype, 'Invalid input dtype.')
 
@@ -1286,6 +1287,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
         new_shape = [-1, llr_ch_shape[-1]]
         llr_ch_reshaped = tf.reshape(llr_ch, new_shape)
         batch_size = tf.shape(llr_ch_reshaped)[0]
+        print("batch_size: ", batch_size.shape)
 
         # invert if rate-matching output interleaver was applied as defined in
         # Sec. 5.4.2.2 in 38.212
@@ -1293,6 +1295,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
             llr_ch_reshaped = tf.gather(llr_ch_reshaped,
                                         self._encoder.out_int_inv,
                                         axis=-1)
+        print("llr_ch_reshaped: ", llr_ch_reshaped.shape)
 
 
         # undo puncturing of the first 2*Z bit positions
@@ -1300,6 +1303,8 @@ class LDPC5GDecoder(LDPCBPDecoder):
             [tf.zeros([batch_size, 2*self.encoder.z], self._output_dtype),
                           llr_ch_reshaped],
                           1)
+        print("llr_5g: ", llr_5g.shape)
+        
 
         # undo puncturing of the last positions
         # total length must be n_ldpc, while llr_ch has length n
@@ -1308,12 +1313,14 @@ class LDPC5GDecoder(LDPCBPDecoder):
         k_filler = self.encoder.k_ldpc - self.encoder.k # number of filler bits
         nb_punc_bits = ((self.encoder.n_ldpc - k_filler)
                                      - self.encoder.n - 2*self.encoder.z)
-
-
+        print("k_filler: ", k_filler)
+        print("nb_punc_bits: ", nb_punc_bits)
+        
         llr_5g = tf.concat([llr_5g,
                    tf.zeros([batch_size, nb_punc_bits - self._nb_pruned_nodes],
                             self._output_dtype)],
                             1)
+        print("llr_5g: ", llr_5g.shape)
 
         # undo shortening (= add 0 positions after k bits, i.e. LLR=LLR_max)
         # the first k positions are the systematic bits
@@ -1349,10 +1356,10 @@ class LDPC5GDecoder(LDPCBPDecoder):
             u_hat = tf.slice(x_hat, [0,0], [batch_size, self.encoder.k])
             print("x_hat: ", x_hat.shape)
             print("u_hat: ", u_hat.shape)
+            
             # Reshape u_hat so that it matches the original input dimensions
             output_shape = list(llr_ch_shape[0:-1]) + [self.encoder.k]
-            # overwrite first dimension as this could be None (Keras)
-            output_shape[0] = -1
+            output_shape[0] = -1 # overwrite first dimension as this could be None (Keras)
             u_reshaped = tf.reshape(u_hat, output_shape)
             print("u_reshaped: ", u_reshaped.shape)
 
