@@ -1342,7 +1342,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
             # reconstruct u_hat # code is systematic
             u_hat = tf.slice(x_hat, [0,0], [batch_size, self.encoder.k])
             # Reshape u_hat so that it matches the original input dimensions
-            output_shape = llr_ch_shape[0:-1] + [self.encoder.k]
+            output_shape = list(llr_ch_shape[0:-1]) + [self.encoder.k]
             # overwrite first dimension as this could be None (Keras)
             output_shape[0] = -1
             u_reshaped = tf.reshape(u_hat, output_shape)
