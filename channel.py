@@ -15,8 +15,9 @@ from sionna.fec.ldpc.encoding import LDPC5GEncoder
 from sionna.fec.ldpc.decoding import LDPC5GDecoder
 
 
+
 class E2EModelDDECC(tf.keras.Model):
-    def __init__(self, model, 
+    def __init__(self, model, decoder,
                        batch_size=1, 
                        return_infobits=False,
                        es_no=False, 
@@ -43,7 +44,7 @@ class E2EModelDDECC(tf.keras.Model):
         self._demapper = Demapper("app", "qam", self._num_bits_per_symbol) #
         # Decoders
         self._decoder = model # DDECCT
-        self._decoder5g = model.decoder 
+        self._decoder5g = decoder # LDPC5GDecoder
         ############################
 
         self._return_infobits = return_infobits
@@ -103,8 +104,9 @@ class E2EModelDDECC(tf.keras.Model):
 
         # run the decoder
         if self._decoder is not None:
-            llr = self._decoder(llr, time_step=0) # 9 no values, 100 bits of data, time step 0
-        print("%%%%%%%%%%%%%%%%%%%")
+            llr = self._decoder5g(llr)
+            print("%%%%%%%%%%%%%%%%%%%")
+            llr_ddecc = self._decoder(llr, time_step=0) # 9 no values, 100 bits of data, time step 0
 
         if self._return_infobits:
             return b, llr
