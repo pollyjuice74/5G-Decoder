@@ -105,9 +105,9 @@ class E2EModelDDECC(tf.keras.Model):
 
         # run the decoder
         if self._decoder is not None:
+            llr_ddecc = self._decoder(llr, time_step=0) # 9 no values, 100 bits of data, time step 0
             print("%%%%%%%%%%%%%%%%%%%")
             llr = self._decoder5g(llr)
-            llr_ddecc = self._decoder(llr, time_step=0) # 9 no values, 100 bits of data, time step 0
 
         if self._return_infobits:
             return b, llr
