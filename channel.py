@@ -18,10 +18,10 @@ from sionna.fec.ldpc.decoding import LDPC5GDecoder
 
 class E2EModelDDECC(tf.keras.Model):
     def __init__(self, model, decoder,
-                       batch_size=1, 
+                       batch_size=1,
                        return_infobits=False,
-                       es_no=False, 
-                       decoder_active=False):        
+                       es_no=False,
+                       decoder_active=False):
         super().__init__()
 
         self._n = model.encoder._n
@@ -29,7 +29,7 @@ class E2EModelDDECC(tf.keras.Model):
 
         self._binary_source = BinarySource()
         self._num_bits_per_symbol = 4 # QAM16
-        
+
         # Channel
         ############################
         # Encoding
@@ -39,7 +39,7 @@ class E2EModelDDECC(tf.keras.Model):
         # Channel
         self._channel = AWGN() #
         # adversarial channel noise emulator
-        
+
         # Decoding
         self._demapper = Demapper("app", "qam", self._num_bits_per_symbol) #
         # Decoders
@@ -49,12 +49,12 @@ class E2EModelDDECC(tf.keras.Model):
 
         self._return_infobits = return_infobits
         self._es_no = es_no
-        
+
         self._batch_size = batch_size
 
     def train(self):
       pass
-    
+
     def test(self):
       pass
 
@@ -104,8 +104,8 @@ class E2EModelDDECC(tf.keras.Model):
 
         # run the decoder
         if self._decoder is not None:
-            llr = self._decoder5g(llr)
             print("%%%%%%%%%%%%%%%%%%%")
+            llr = self._decoder5g(llr)
             llr_ddecc = self._decoder(llr, time_step=0) # 9 no values, 100 bits of data, time step 0
 
         if self._return_infobits:
