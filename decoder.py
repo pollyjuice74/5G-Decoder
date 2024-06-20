@@ -1281,7 +1281,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
             llr_ch, msg_vn = inputs
         else:
             llr_ch = inputs
-        print(f"\n 5G Decoding llr_ch ({llr_ch.shape}) ")
+        print(f"\n5G Decoding llr_ch ({llr_ch.shape}) ")
 
         tf.debugging.assert_type(llr_ch, self.dtype, 'Invalid input dtype.')
 
