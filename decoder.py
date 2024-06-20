@@ -1343,8 +1343,11 @@ class LDPC5GDecoder(LDPCBPDecoder):
             * tf.ones([batch_size, k_filler], self._output_dtype)
         print("z: ", z.shape)
 
-        llr_5g = tf.concat([x1, z, x2], 1)
-        print("llr_5g: ", llr_5g.shape)
+        # Completed llr turned into (n_ldpc,1) vector
+        ###############
+        llr_5g = tf.concat([x1, z, x2], 1) 
+        print("llr_5g: ", llr_5g.shape, " n_ldpc: ", encoder._n_ldcp)
+        ###############
 
         # and execute the decoder
         if not self._stateful:
