@@ -16,7 +16,6 @@ from sionna.fec.ldpc.encoding import LDPC5GEncoder
 from sionna.fec.ldpc.decoding import LDPC5GDecoder
 
 
-
 class E2EModelDDECC(tf.keras.Model):
     def __init__(self, model, decoder,
                        batch_size=1,
@@ -30,6 +29,7 @@ class E2EModelDDECC(tf.keras.Model):
 
         self._binary_source = BinarySource()
         self._num_bits_per_symbol = 4 # QAM16
+
 
         # Channel
         ############################
@@ -53,6 +53,9 @@ class E2EModelDDECC(tf.keras.Model):
 
         self._batch_size = batch_size
 
+        # Channel info
+        self.ebno_db = np.arange(0, 4.5, 0.5) # ebno_db_min, ebno_db_max, ebno_db_stepsize
+
     def train(self):
       pass
 
@@ -60,14 +63,14 @@ class E2EModelDDECC(tf.keras.Model):
       pass
 
     # @tf.function(jit_compile=True)
-    def call(self, ebno_db):
+    def call(self):
         # Noise Variance
         if self._decoder is not None and self._es_no==False: # no rate-adjustment for uncoded transmission or es_no scenario
-            no = ebnodb2no(ebno_db, self._num_bits_per_symbol, self._k/self._n) ### LOOK UP EBNODB2NO
+            no = ebnodb2no(self.ebno_db, self._num_bits_per_symbol, self._k/self._n) ### LOOK UP EBNODB2NO
         else: #for uncoded transmissions the rate is 1
-            no = ebnodb2no(ebno_db, self._num_bits_per_symbol, 1) ###
+            no = ebnodb2no(self.ebno_db, self._num_bits_per_symbol, 1) ###
         no = tf.expand_dims(tf.cast(no, tf.float32), axis=-1) # turn to float32, turns shape (9,) -> (9,1)
-        print("no, ebno_db: ", no.shape, ebno_db.shape)
+        print("no, ebno_db: ", no.shape, self.ebno_db.shape)
 
         b = self._binary_source([self._batch_size, self._encoder._k]) # (batch_size, k), k information bits
         print("bit: ", b.shape) # print(b.shape[-1]==self._k, b.shape, self._k, self._n - self._k)
@@ -120,3 +123,4 @@ class E2EModelDDECC(tf.keras.Model):
         #     return b, llr_ddecc
         # else:
         #     return c, llr_ddecc
+
