@@ -1155,7 +1155,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
                  cn_type='boxplus-phi',
                  hard_out=True,
                  track_exit=False,
-                 return_infobits=False, # True gives u_out (9, k), False x_no_filler (9, k_ldpc)
+                 return_infobits=True, # True gives u_out (9, k), False x_no_filler (9, k_ldpc)
                  prune_pcm=False, # True 
                  num_iter=20,
                  stateful=False,
