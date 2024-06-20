@@ -1349,13 +1349,8 @@ class LDPC5GDecoder(LDPCBPDecoder):
         llr_5g = tf.concat([x1, z, x2], 1) 
         print("llr_5g: ", llr_5g.shape, " n_ldpc: ", self.encoder._n_ldpc)
         ###############
-        
-        # remove last dim
-        x = tf.reshape(x_hat, [batch_size, self._n_pruned])
-        print("x: ", x.shape)
 
-
-        return llr_5g, x
+        return llr_5g
 
         # # and execute the decoder
         # if not self._stateful:
