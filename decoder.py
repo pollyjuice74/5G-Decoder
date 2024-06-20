@@ -912,6 +912,7 @@ class LDPCBPDecoder(Layer):
                         values=msg_vn,
                         row_splits=tf.constant(self._vn_row_splits, tf.int32))
             # variable node update
+            print("msg_vn: ", msg_vn.shape, " llr_ch: ", llr_ch.shape)
             msg_vn = self._vn_update(msg_vn, llr_ch)
 
             # track exit decoding trajectory; requires all-zero cw
@@ -930,6 +931,7 @@ class LDPCBPDecoder(Layer):
             msg_cn = tf.gather(msg_vn.flat_values, self._cn_mask_tf, axis=None)
 
             # check node update using the pre-defined function
+            print("msg_cn: ", msg_cn.shape)
             msg_cn = self._cn_update(msg_cn)
 
             # track exit decoding trajectory; requires all-zero cw?
