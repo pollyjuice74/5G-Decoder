@@ -16,7 +16,6 @@ from sionna.fec.ldpc.encoding import LDPC5GEncoder
 from sionna.fec.ldpc.decoding import LDPC5GDecoder
 
 
-
 class E2EModelDDECC(tf.keras.Model):
     def __init__(self, model, decoder,
                        batch_size=1,
@@ -105,7 +104,10 @@ class E2EModelDDECC(tf.keras.Model):
 
         # run the decoder
         if self._decoder is not None:
-            llr = self._decoder5g(llr)
+            llr = tf.convert_to_tensor(llr.numpy(), dtype=tf.float32) # Pytorch to Tensorflow
+            llr = self._decoder5g(llr) # Gets reshaped (n_ldpc,1) llrs
+            print("llr (n_ldpc,): ", llr.shape, " sum positive: ", tf.reduce_sum(tf.boolean_mask(llr, llr > 0)), " n_ldpc: ", self._encoder._n_ldpc)
+            print("llr (crude): ", llr[:, 54])
             llr_ddecc = self._decoder(llr, time_step=0) # 9 no values, 100 bits of data, time step 0
             print("%%%%%%%%%%%%%%%%%%%")
 
