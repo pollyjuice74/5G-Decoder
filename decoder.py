@@ -1274,13 +1274,12 @@ class LDPC5GDecoder(LDPCBPDecoder):
 
             InvalidArgumentError: When rank(``inputs``)<2.
         """
-
         # Extract inputs
         if self._stateful:
             llr_ch, msg_vn = inputs
         else:
             llr_ch = inputs
-        print("llr_ch: ", llr_ch.shape)
+        print(f"\n 5G Decoding llr_ch ({llr_ch.shape}) ")
 
         tf.debugging.assert_type(llr_ch, self.dtype, 'Invalid input dtype.')
 
