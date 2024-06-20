@@ -1345,7 +1345,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
         # Completed llr turned into (n_ldpc,1) vector
         ###############
         llr_5g = tf.concat([x1, z, x2], 1) 
-        print("llr_5g: ", llr_5g.shape, " n_ldpc: ", encoder._n_ldcp)
+        print("llr_5g: ", llr_5g.shape, " n_ldpc: ", self.encoder._n_ldcp)
         ###############
 
         # and execute the decoder
