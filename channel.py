@@ -15,7 +15,6 @@ from sionna.fec.ldpc import LDPCBPDecoder
 from sionna.fec.ldpc.encoding import LDPC5GEncoder
 from sionna.fec.ldpc.decoding import LDPC5GDecoder
 
-
 class E2EModelDDECC(tf.keras.Model):
     def __init__(self, model, decoder,
                        batch_size=1,
@@ -54,7 +53,7 @@ class E2EModelDDECC(tf.keras.Model):
         self._batch_size = batch_size
 
         # Channel info
-        self.ebno_db = np.arange(0, 4.5, 0.5) # ebno_db_min, ebno_db_max, ebno_db_stepsize
+        self.ebno_db = np.arange(0, 0.5, 0.5) #4.5 # ebno_db_min, ebno_db_max, ebno_db_stepsize
 
     def train(self):
       pass
@@ -123,4 +122,6 @@ class E2EModelDDECC(tf.keras.Model):
         #     return b, llr_ddecc
         # else:
         #     return c, llr_ddecc
+
+
 
