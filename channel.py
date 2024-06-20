@@ -60,6 +60,7 @@ class E2EModelDDECC(tf.keras.Model):
 
     # @tf.function(jit_compile=True)
     def call(self, ebno_db):
+        print("\nE2EModel ")
         # Noise Variance
         if self._decoder is not None and self._es_no==False: # no rate-adjustment for uncoded transmission or es_no scenario
             no = ebnodb2no(ebno_db, self._num_bits_per_symbol, self._k/self._n) ### LOOK UP EBNODB2NO
