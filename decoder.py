@@ -847,12 +847,12 @@ class LDPCBPDecoder(Layer):
 
             InvalidArgumentError: When rank(``inputs``)<2.
         """
-        print(f"\nBP llr ({llr_ch.shape}) decoding")
         # Extract inputs
         if self._stateful:
             llr_ch, msg_vn = inputs
         else:
             llr_ch = inputs
+        print(f"\nBP llr ({llr_ch.shape}) decoding")
 
         tf.debugging.assert_type(llr_ch, self.dtype, 'Invalid input dtype.')
 
