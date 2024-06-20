@@ -60,7 +60,6 @@ class E2EModelDDECC(tf.keras.Model):
 
     # @tf.function(jit_compile=True)
     def call(self, ebno_db):
-        print("\nE2EModel ")
         # Noise Variance
         if self._decoder is not None and self._es_no==False: # no rate-adjustment for uncoded transmission or es_no scenario
             no = ebnodb2no(ebno_db, self._num_bits_per_symbol, self._k/self._n) ### LOOK UP EBNODB2NO
@@ -109,10 +108,11 @@ class E2EModelDDECC(tf.keras.Model):
             llr = self._decoder5g(llr) # Gets reshaped (n_ldpc,1) llrs
             print("llr (n_ldpc,): ", llr.shape, " sum positive: ", tf.reduce_sum(tf.boolean_mask(llr, llr > 0)), " n_ldpc: ", self._encoder._n_ldpc)
             print("llr (crude): ", llr[:, 54])
+
             llr_ddecc = self._decoder(llr, time_step=0) # 9 no values, 100 bits of data, time step 0
-            print("%%%%%%%%%%%%%%%%%%%")
+            print("llr_ddecc: ", llr_ddecc.shape)
 
         if self._return_infobits:
-            return b, llr
+            return b, llr_ddecc
         else:
-            return c, llr
+            return c, llr_ddecc
