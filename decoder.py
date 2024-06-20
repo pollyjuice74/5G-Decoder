@@ -847,7 +847,7 @@ class LDPCBPDecoder(Layer):
 
             InvalidArgumentError: When rank(``inputs``)<2.
         """
-
+        print(f"\nBP llr ({llr_ch.shape}) decoding")
         # Extract inputs
         if self._stateful:
             llr_ch, msg_vn = inputs
@@ -983,6 +983,7 @@ class LDPCBPDecoder(Layer):
 
         # cast output to output_dtype
         x_out = tf.cast(x_reshaped, self._output_dtype)
+        print("x_out: ", x_out.shape)
 
         if not self._stateful:
             return x_out
