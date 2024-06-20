@@ -1324,7 +1324,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
 
         # undo shortening (= add 0 positions after k bits, i.e. LLR=LLR_max)
         # the first k positions are the systematic bits
-        x1 = tf.slice(llr_5g, [0,0], [batch_size, self.encoder.k])
+        x1 = tf.slice(llr_5g, [0,0], [batch_size, self.encoder.k]) # (9, k)
         print("x1: ", x1.shape)
 
         # parity part
@@ -1334,12 +1334,12 @@ class LDPC5GDecoder(LDPCBPDecoder):
         
         x2 = tf.slice(llr_5g,
                       [0, self.encoder.k],
-                      [batch_size, nb_par_bits])
+                      [batch_size, nb_par_bits]) # (9, k_ldpc - k) parity bits 
         print("x2: ", x2.shape)
 
         # negative sign due to logit definition
         z = -tf.cast(self._llr_max, self._output_dtype) \
-            * tf.ones([batch_size, k_filler], self._output_dtype)
+            * tf.ones([batch_size, k_filler], self._output_dtype) # 9, k_ldpc - k) filler bits
         print("z: ", z.shape)
 
         # Completed llr turned into (n_ldpc,1) vector
