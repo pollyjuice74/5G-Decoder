@@ -858,11 +858,13 @@ class LDPCBPDecoder(Layer):
 
         # internal calculations still in tf.float32
         llr_ch = tf.cast(llr_ch, tf.float32)
+        print("llr_ch: ", llr_ch.shape)
 
         # clip llrs for numerical stability
         llr_ch = tf.clip_by_value(llr_ch,
                                   clip_value_min=-self._llr_max,
                                   clip_value_max=self._llr_max)
+        print("llr_ch: ", llr_ch.shape)
 
         # last dim must be of length n
         tf.debugging.assert_equal(tf.shape(llr_ch)[-1],
@@ -872,6 +874,7 @@ class LDPCBPDecoder(Layer):
         llr_ch_shape = llr_ch.shape
         new_shape = [-1, self._num_vns]
         llr_ch_reshaped = tf.reshape(llr_ch, new_shape)
+        print("llr_ch_reshaped: ", llr_ch_reshaped.shape)
 
         # must be done during call, as XLA fails otherwise due to ragged
         # indices placed on the CPU device.
@@ -881,8 +884,10 @@ class LDPCBPDecoder(Layer):
 
         # batch dimension is last dimension due to ragged tensor representation
         llr_ch = tf.transpose(llr_ch_reshaped, (1,0))
+        print("llr_ch: ", llr_ch.shape)
 
         llr_ch = -1. * llr_ch # logits are converted into "true" llrs
+        print("llr_ch: ", llr_ch.shape)
 
         # init internal decoder state if not explicitly
         # provided (e.g., required to restore decoder state for iterative
@@ -896,6 +901,8 @@ class LDPCBPDecoder(Layer):
             msg_vn = tf.zeros(msg_shape, dtype=tf.float32)
         else:
             msg_vn = msg_vn.flat_values
+        print("msg_shape: ", msg_shape)
+        print("msg_vn: ", msg_vn)
 
         # track exit decoding trajectory; requires all-zero cw?
         if self._track_exit:
@@ -959,29 +966,36 @@ class LDPCBPDecoder(Layer):
                                      (llr_ch, msg_vn, it),
                                      parallel_iterations=1,
                                      maximum_iterations=self._num_iter)
+        print("msg_vn: ", msg_vn)
 
 
         # raggedTensor for final marginalization
         msg_vn = tf.RaggedTensor.from_row_splits(
                         values=msg_vn,
                         row_splits=tf.constant(self._vn_row_splits, tf.int32))
+        print("msg_vn: ", msg_vn.shape)
 
         # marginalize and remove ragged Tensor
         x_hat = tf.add(llr_ch, tf.reduce_sum(msg_vn, axis=1))
+        print("x_hat: ", x_hat.shape)
 
         # restore batch dimension to first dimension
         x_hat = tf.transpose(x_hat, (1,0))
+        print("x_hat: ", x_hat.shape)
 
         x_hat = -1. * x_hat # convert llrs back into logits
 
         if self._hard_out: # hard decide decoder output if required
             x_hat = tf.cast(tf.less(0.0, x_hat), self._output_dtype)
+        print("x_hat: ", x_hat.shape)
 
         # Reshape c_short so that it matches the original input dimensions
         output_shape = list(llr_ch_shape)
         output_shape[0] = -1 # overwrite batch dim (can be None in Keras)
+        print("output_shape: ", output_shape)
 
         x_reshaped = tf.reshape(x_hat, output_shape)
+        print("x_reshaped: ", x_reshaped.shape)
 
         # cast output to output_dtype
         x_out = tf.cast(x_reshaped, self._output_dtype)
