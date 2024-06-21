@@ -1336,7 +1336,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
         
         x2 = tf.slice(llr_5g,
                       [0, self.encoder.k],
-                      [batch_size, nb_par_bits]) # (9, k_ldpc - k) parity bits 
+                      [batch_size, nb_par_bits]) # (9, m_ldpc) parity bits 
         print("x2: ", x2.shape)
 
         # negative sign due to logit definition
