@@ -15,6 +15,8 @@ from sionna.fec.ldpc import LDPCBPDecoder
 from sionna.fec.ldpc.encoding import LDPC5GEncoder
 from sionna.fec.ldpc.decoding import LDPC5GDecoder
 
+
+
 class E2EModelDDECC(tf.keras.Model):
     def __init__(self, model, decoder,
                        batch_size=1,
@@ -38,7 +40,7 @@ class E2EModelDDECC(tf.keras.Model):
 
         # Channel
         self._channel = AWGN() #
-        # adversarial channel noise emulator
+        # Add adversarial channel noise emulator
 
         # Decoding
         self._demapper = Demapper("app", "qam", self._num_bits_per_symbol) #
@@ -94,29 +96,37 @@ class E2EModelDDECC(tf.keras.Model):
         # Channel
         ############################
         x = self._mapper(c_pad)
-        y = self._channel([x, no]) ###
-        llr = self._demapper([y, no])
+        # y = self._channel([x, no]) ###
+        llr = self._demapper([x, no]) # no noise
         ############################
-        print("y, no: ", y.shape, no.shape)
+        # print("y, no: ", y.shape, no.shape)
 
         # remove zero padded bit at the end
         if self._n%2 == 1:
             llr = llr[:,:-1]
-        llr = torch.tensor(llr.numpy())
-        print("llr: ", llr.shape,)# b, c, x, y)
+        print("llr: ", llr.shape, llr)# b, c, x, y)
 
-        # run the decoder
-        if self._decoder is not None:
-            llr = tf.convert_to_tensor(llr.numpy(), dtype=tf.float32) # Pytorch to Tensorflow
-            llr = self._decoder5g(llr) # Gets reshaped (n_ldpc,1) llrs
-            print("llr (n_ldpc,): ", llr.shape, " sum positive: ", tf.reduce_sum(tf.boolean_mask(llr, llr > 0)), " n_ldpc: ", self._encoder._n_ldpc)
-            print("llr (crude): ", llr[:, 54])
+        # Run decoder
+        llr_nldpc, u_hat, x_hat = self._decoder5g(llr) # Gets reshaped (n_ldpc,1) llrs
+        print("llr (n_ldpc,): ", llr_nldpc.shape, " sum positive: ", tf.reduce_sum(tf.boolean_mask(llr, llr > 0)), " n_ldpc: ", self._encoder._n_ldpc)
+        print("llr (crude): ", llr_nldpc[:, 54])
 
-            llr_ddecc = self._decoder(llr, time_step=0) # 9 no values, 100 bits of data, time step 0
-            print("llr_ddecc: ", llr_ddecc.shape)
+        if isinstance(llr, tf.Tensor):
+            llr = torch.tensor(llr.numpy())
+        if isinstance(llr_nldpc, tf.Tensor):
+            llr_nldpc = torch.tensor(llr_nldpc.numpy())
+
+        r_cw = (llr > 0).float()
+        print("c == r_cw: ", c.shape, c==r_cw)
+
+        llr_ddecc = self._decoder(llr_nldpc, time_step=0) # Outputs decoded llrs (n_ldpc,1)
+        print("llr_ddecc: ", llr_ddecc.shape)
+
+        # TODO: How do I turn the decoded llrs of (n_ldpc,1) to c_hat (n,1)?
+        c_hat = llr_ddecc
 
         # codeword, info bits, llr of either cw or info bits
-        return c, b, llr_ddecc 
+        return c, b, c_hat 
 
         # if self._return_infobits:
         #     return b, llr_ddecc
