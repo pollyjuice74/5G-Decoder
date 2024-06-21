@@ -1425,5 +1425,5 @@ class LDPC5GDecoder(LDPCBPDecoder):
         #     else:
         #         return x_out, msg_vn
         
-        return llr_5g
+        return llr_5g, u_out, x_out
        
