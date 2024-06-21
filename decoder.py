@@ -1418,6 +1418,10 @@ class LDPC5GDecoder(LDPCBPDecoder):
         x_short= tf.reshape(x_short, llr_ch_shape)
         print("x_short: ", x_short.shape)
 
+        new_llr_ch_shape = list(llr_ch_shape.as_list())
+        new_llr_ch_shape[0] = -1
+        x_short = tf.reshape(x_short, new_llr_ch_shape)
+
         # enable other output datatypes than tf.float32
         x_out = tf.cast(x_short, self._output_dtype)
         print("x_out: ", x_out.shape)
