@@ -1341,7 +1341,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
 
         # negative sign due to logit definition
         z = -tf.cast(self._llr_max, self._output_dtype) \
-            * tf.ones([batch_size, k_filler], self._output_dtype) # 9, k_ldpc - k) filler bits
+            * tf.ones([batch_size, k_filler], self._output_dtype) # 9, m_ldpc) filler bits
         print("z: ", z.shape, z)
 
         # Completed llr turned into (n_ldpc,1) vector
