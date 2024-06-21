@@ -1404,11 +1404,13 @@ class LDPC5GDecoder(LDPCBPDecoder):
         x_short = tf.slice(x_no_filler,
                            [0, 2*self.encoder.z],
                            [batch_size, self.encoder.n])
+        print("x_short: ", x_short.shape)
 
         # if used, apply rate-matching output interleaver again as
         # Sec. 5.4.2.2 in 38.212
         if self._encoder.num_bits_per_symbol is not None:
             x_short = tf.gather(x_short, self._encoder.out_int, axis=-1)
+        print("x_short: ", x_short.shape)
 
         # Reshape x_short so that it matches the original input dimensions
         # overwrite first dimension as this could be None (Keras)
