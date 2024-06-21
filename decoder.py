@@ -912,7 +912,7 @@ class LDPCBPDecoder(Layer):
                         values=msg_vn,
                         row_splits=tf.constant(self._vn_row_splits, tf.int32))
             # variable node update
-            print("msg_vn: ", msg_vn.shape, " llr_ch: ", llr_ch.shape)
+            # print("msg_vn: ", msg_vn.shape, " llr_ch: ", llr_ch.shape)
             msg_vn = self._vn_update(msg_vn, llr_ch)
 
             # track exit decoding trajectory; requires all-zero cw
@@ -931,7 +931,7 @@ class LDPCBPDecoder(Layer):
             msg_cn = tf.gather(msg_vn.flat_values, self._cn_mask_tf, axis=None)
 
             # check node update using the pre-defined function
-            print("msg_cn: ", msg_cn.shape)
+            # print("msg_cn: ", msg_cn.shape)
             msg_cn = self._cn_update(msg_cn)
 
             # track exit decoding trajectory; requires all-zero cw?
@@ -1360,7 +1360,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
         # if self._return_infobits: # return only info bits
         # reconstruct u_hat # code is systematic
         u_hat = tf.slice(x_hat, [0,0], [batch_size, self.encoder.k])
-        print("x_hat: ", x_hat.shape)
+        print("x_hat: ", x_hat.shape, x_hat)
         print("u_hat: ", u_hat.shape)
         
         # Reshape u_hat so that it matches the original input dimensions
