@@ -881,7 +881,7 @@ class LDPCBPDecoder(Layer):
         # create permutation index from cn perspective
         self._cn_mask_tf = tf.ragged.constant(self._gen_node_mask(self._cn_con),
                                               row_splits_dtype=tf.int32)
-        print("cn_mask_tf: ", self._cn_mask_tf)
+        print("cn_mask_tf: ", self._cn_mask_tf.shape, self._cn_mask_tf)
 
         # batch dimension is last dimension due to ragged tensor representation
         llr_ch = tf.transpose(llr_ch_reshaped, (1,0))
