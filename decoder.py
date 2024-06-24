@@ -909,6 +909,8 @@ class LDPCBPDecoder(Layer):
         if self._track_exit:
             self._ie_c = tf.zeros(self._num_iter+1)
             self._ie_v = tf.zeros(self._num_iter+1)
+        print("ie_c: ", self._ie_c)
+        print("ie_v: ", self._ie_v)
 
         # perform one decoding iteration
         # Remark: msg_vn cannot be ragged as input for tf.while_loop as
