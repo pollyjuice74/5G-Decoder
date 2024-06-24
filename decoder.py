@@ -864,7 +864,7 @@ class LDPCBPDecoder(Layer):
         llr_ch = tf.clip_by_value(llr_ch,
                                   clip_value_min=-self._llr_max,
                                   clip_value_max=self._llr_max)
-        print("llr_ch: ", llr_ch.shape, "min_clip: ", clip_value_min, "max_clip: ", clip_value_max)
+        print("llr_ch: ", llr_ch.shape, "min_clip: ", -self._llr_max, "max_clip: ", self._llr_max)
 
         # last dim must be of length n
         tf.debugging.assert_equal(tf.shape(llr_ch)[-1],
