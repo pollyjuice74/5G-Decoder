@@ -971,7 +971,6 @@ class LDPCBPDecoder(Layer):
                                      maximum_iterations=self._num_iter)
         print("msg_vn: ", msg_vn)
 
-
         # raggedTensor for final marginalization
         msg_vn = tf.RaggedTensor.from_row_splits(
                         values=msg_vn,
