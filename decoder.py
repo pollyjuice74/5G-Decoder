@@ -975,7 +975,7 @@ class LDPCBPDecoder(Layer):
         msg_vn = tf.RaggedTensor.from_row_splits(
                         values=msg_vn,
                         row_splits=tf.constant(self._vn_row_splits, tf.int32))
-        print("msg_vn: ", msg_vn.shape)
+        print("msg_vn: ", msg_vn.shape, msg_vn)
 
         # marginalize and remove ragged Tensor
         x_hat = tf.add(llr_ch, tf.reduce_sum(msg_vn, axis=1))
