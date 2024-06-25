@@ -979,7 +979,7 @@ class LDPCBPDecoder(Layer):
 
         # marginalize and remove ragged Tensor
         x_hat = tf.add(llr_ch, tf.reduce_sum(msg_vn, axis=1))
-        print("x_hat: ", x_hat.shape)
+        print("x_hat: ", x_hat.shape, x_hat)
 
         # restore batch dimension to first dimension
         x_hat = tf.transpose(x_hat, (1,0))
@@ -989,7 +989,7 @@ class LDPCBPDecoder(Layer):
 
         if self._hard_out: # hard decide decoder output if required
             x_hat = tf.cast(tf.less(0.0, x_hat), self._output_dtype)
-        print("x_hat: ", x_hat.shape)
+        print("x_hat: ", x_hat.shape, x_hat)
 
         # Reshape c_short so that it matches the original input dimensions
         output_shape = list(llr_ch_shape)
