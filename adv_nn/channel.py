@@ -10,15 +10,11 @@
 # TRAIN
   # for {batch_ix, H, (m, c, z, r, c_llr, r_llr, magnitude, syndrome)} in enumerate(test_data):
       # z is either 0 or a structured noise process
-      # z_G ~ G(c, z, H) such that,
+      # z_G ~ G(c, H) that could also optionally have knowledge of z such that,
       # z_out = z + z_G
-      #
+
       # r = c + z_out
       # c_hat, z_hat = D(r, H) 
-      # 
-      # loss = loss_fn(c_hat, c)
-      #
-      # 
 
 
 # TEST
@@ -32,10 +28,24 @@
           # c_hat, z_hat = D(r, H) 
           
           # print(c_hat, c)
-          # print(BER(c_hat, c), FER(c_hat, c))     bit error rate, forward error rate
+          # print(BER(c_hat, c), FER(c_hat, c))     bit error rate, frame error rate
         
-      # Eb = b/s bits per second transmitted through a channel 
-      # No = Hz, Hz = k*T, for every T temperature units and k is Boltzmann's constant meaning more energy 
+      # Eb = b/s, bits per second transmitted through a channel 
+      # No = Hz, No=k*T for every T temperature units and k is Boltzmann's constant meaning more energy 
+
+
+# For context, we are training with eb_no of 4,5,6 
+# and cities, suburbs, rural areas, mountain areas have eb_nos 
+# of  8-15,   10-18,   12-20,       5-12     respectively.
+
+# Frame Error Rate is the ratio of errored frames to 
+# transmitted frames where frames are structured binary blocks 
+# of data used for transmission. They have a certain amount of
+# bits per frame.
+
+# Bit Error Rate is the ratio of errored bits transmitted 
+# to total bits transmitted.
+
 
 
 class Channel:
