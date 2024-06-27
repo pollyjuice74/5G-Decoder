@@ -29,10 +29,10 @@
           
           # print(c_hat, c)
           # print(BER(c_hat, c), FER(c_hat, c))     bit error rate, frame error rate
-        
-      # Eb = b/s, bits per second transmitted through a channel 
-      # No = Hz, No=k*T for every T temperature units and k is Boltzmann's constant meaning more energy 
 
+
+# Eb = b/s, bits per second transmitted through a channel 
+# No = Hz, No=k*T for every T temperature units and k is Boltzmann's constant meaning more energy 
 
 # For context, we are training with eb_no of 4,5,6 
 # and cities, suburbs, rural areas, mountain areas have eb_nos 
@@ -46,6 +46,26 @@
 # Bit Error Rate is the ratio of errored bits transmitted 
 # to total bits transmitted.
 
+
+# Game Theory Aproach
+
+# G has a set (S,A,K) containing strategies S, actions A and knowledge K,
+# D also has an (S,A,K).
+
+# Strategies:
+    # G can create a real vector z_G of shape (n,1).
+    # D can create a real vectors c_hat, z_hat of shape (n,1).
+        
+# Actions:
+    # G's z_G is constrained by some ability to fool D (make D have more errors than with standard AWGN), 
+        # by some factor and by some standard deviation.
+    # D's c_hat, z_hat are constrained by some ability to decode an r = z + z_G, 
+        # into a very close aproximation of c and z 
+
+# Knowledge: 
+    # H is common knowledge to both parties, 
+    # c,z are known to G but not D, 
+    # r is known to D.
 
 
 class Channel:
