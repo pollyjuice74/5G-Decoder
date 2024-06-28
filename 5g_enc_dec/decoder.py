@@ -858,13 +858,13 @@ class LDPCBPDecoder(Layer):
 
         # internal calculations still in tf.float32
         llr_ch = tf.cast(llr_ch, tf.float32)
-        print("llr_ch: ", llr_ch.shape)
+        # print("llr_ch: ", llr_ch.shape)
 
         # clip llrs for numerical stability
         llr_ch = tf.clip_by_value(llr_ch,
                                   clip_value_min=-self._llr_max,
                                   clip_value_max=self._llr_max)
-        print("llr_ch: ", llr_ch.shape, "min_clip: ", -self._llr_max, "max_clip: ", self._llr_max)
+        # print("llr_ch: ", llr_ch.shape, "min_clip: ", -self._llr_max, "max_clip: ", self._llr_max)
 
         # last dim must be of length n
         tf.debugging.assert_equal(tf.shape(llr_ch)[-1],
@@ -874,21 +874,21 @@ class LDPCBPDecoder(Layer):
         llr_ch_shape = llr_ch.shape
         new_shape = [-1, self._num_vns]
         llr_ch_reshaped = tf.reshape(llr_ch, new_shape)
-        print("llr_ch_reshaped: ", llr_ch_reshaped.shape)
+        # print("llr_ch_reshaped: ", llr_ch_reshaped.shape)
 
         # must be done during call, as XLA fails otherwise due to ragged
         # indices placed on the CPU device.
         # create permutation index from cn perspective
         self._cn_mask_tf = tf.ragged.constant(self._gen_node_mask(self._cn_con),
                                               row_splits_dtype=tf.int32)
-        print("cn_mask_tf: ", self._cn_mask_tf.shape, self._cn_mask_tf)
+        # print("cn_mask_tf: ", self._cn_mask_tf.shape, self._cn_mask_tf)
 
         # batch dimension is last dimension due to ragged tensor representation
         llr_ch = tf.transpose(llr_ch_reshaped, (1,0))
-        print("llr_ch: ", llr_ch.shape)
+        # print("llr_ch: ", llr_ch.shape)
 
         llr_ch = -1. * llr_ch # logits are converted into "true" llrs
-        print("llr_ch: ", llr_ch.shape)
+        # print("llr_ch: ", llr_ch.shape)
 
         # init internal decoder state if not explicitly
         # provided (e.g., required to restore decoder state for iterative
@@ -902,15 +902,15 @@ class LDPCBPDecoder(Layer):
             msg_vn = tf.zeros(msg_shape, dtype=tf.float32)
         else:
             msg_vn = msg_vn.flat_values
-        print("msg_shape: ", msg_shape)
-        print("msg_vn: ", msg_vn)
+        # print("msg_shape: ", msg_shape)
+        # print("msg_vn: ", msg_vn)
 
         # track exit decoding trajectory; requires all-zero cw?
         if self._track_exit:
             self._ie_c = tf.zeros(self._num_iter+1)
             self._ie_v = tf.zeros(self._num_iter+1)
-        print("ie_c: ", self._ie_c)
-        print("ie_v: ", self._ie_v)
+        # print("ie_c: ", self._ie_c)
+        # print("ie_v: ", self._ie_v)
 
         # perform one decoding iteration
         # Remark: msg_vn cannot be ragged as input for tf.while_loop as
@@ -969,39 +969,39 @@ class LDPCBPDecoder(Layer):
                                      (llr_ch, msg_vn, it),
                                      parallel_iterations=1,
                                      maximum_iterations=self._num_iter)
-        print("msg_vn: ", msg_vn)
+        # print("msg_vn: ", msg_vn)
 
         # raggedTensor for final marginalization
         msg_vn = tf.RaggedTensor.from_row_splits(
                         values=msg_vn,
                         row_splits=tf.constant(self._vn_row_splits, tf.int32))
-        print("msg_vn: ", msg_vn.shape, msg_vn)
+        # print("msg_vn: ", msg_vn.shape, msg_vn)
 
         # marginalize and remove ragged Tensor
         x_hat = tf.add(llr_ch, tf.reduce_sum(msg_vn, axis=1))
-        print("x_hat: ", x_hat.shape, x_hat)
+        # print("x_hat: ", x_hat.shape, x_hat)
 
         # restore batch dimension to first dimension
         x_hat = tf.transpose(x_hat, (1,0))
-        print("x_hat: ", x_hat.shape)
+        # print("x_hat: ", x_hat.shape)
 
         x_hat = -1. * x_hat # convert llrs back into logits
 
         # if self._hard_out: # hard decide decoder output if required
         #     x_hat = tf.cast(tf.less(0.0, x_hat), self._output_dtype)
-        print("x_hat: ", x_hat.shape, x_hat)
+        # print("x_hat: ", x_hat.shape, x_hat)
 
         # Reshape c_short so that it matches the original input dimensions
         output_shape = list(llr_ch_shape)
         output_shape[0] = -1 # overwrite batch dim (can be None in Keras)
-        print("output_shape: ", output_shape)
+        # print("output_shape: ", output_shape)
 
         x_reshaped = tf.reshape(x_hat, output_shape)
-        print("x_reshaped: ", x_reshaped.shape)
+        # print("x_reshaped: ", x_reshaped.shape)
 
         # cast output to output_dtype
         x_out = tf.cast(x_reshaped, self._output_dtype)
-        print("x_out: ", x_out.shape)
+        # print("x_out: ", x_out.shape)
 
         if not self._stateful:
             return x_out
@@ -1305,7 +1305,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
         new_shape = [-1, llr_ch_shape[-1]]
         llr_ch_reshaped = tf.reshape(llr_ch, new_shape)
         batch_size = tf.shape(llr_ch_reshaped)[0]
-        print("batch_size: ", batch_size.shape)
+        # print("batch_size: ", batch_size.shape)
 
         # invert if rate-matching output interleaver was applied as defined in
         # Sec. 5.4.2.2 in 38.212
@@ -1313,7 +1313,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
             llr_ch_reshaped = tf.gather(llr_ch_reshaped,
                                         self._encoder.out_int_inv,
                                         axis=-1)
-        print("llr_ch_reshaped: ", llr_ch_reshaped.shape)
+        # print("llr_ch_reshaped: ", llr_ch_reshaped.shape)
 
 
         # undo puncturing of the first 2*Z bit positions
@@ -1321,7 +1321,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
             [tf.zeros([batch_size, 2*self.encoder.z], self._output_dtype),
                           llr_ch_reshaped],
                           1)
-        print("llr_5g: ", llr_5g.shape)
+        # print("llr_5g: ", llr_5g.shape)
         
 
         # undo puncturing of the last positions
@@ -1331,39 +1331,39 @@ class LDPC5GDecoder(LDPCBPDecoder):
         k_filler = self.encoder.k_ldpc - self.encoder.k # number of filler bits
         nb_punc_bits = ((self.encoder.n_ldpc - k_filler)
                                      - self.encoder.n - 2*self.encoder.z)
-        print("k_filler: ", k_filler)
-        print("nb_punc_bits: ", nb_punc_bits)
+        # print("k_filler: ", k_filler)
+        # print("nb_punc_bits: ", nb_punc_bits)
         
         llr_5g = tf.concat([llr_5g,
                    tf.zeros([batch_size, nb_punc_bits - self._nb_pruned_nodes],
                             self._output_dtype)],
                             1)
-        print("llr_5g: ", llr_5g.shape)
+        # print("llr_5g: ", llr_5g.shape)
 
         # undo shortening (= add 0 positions after k bits, i.e. LLR=LLR_max)
         # the first k positions are the systematic bits
         x1 = tf.slice(llr_5g, [0,0], [batch_size, self.encoder.k]) # (9, k)
-        print("x1: ", x1.shape)
+        # print("x1: ", x1.shape)
 
         # parity part
         nb_par_bits = (self.encoder.n_ldpc - k_filler
                        - self.encoder.k - self._nb_pruned_nodes)
-        print("nb_par_bits: ",nb_par_bits)
+        # print("nb_par_bits: ",nb_par_bits)
         
         x2 = tf.slice(llr_5g,
                       [0, self.encoder.k],
                       [batch_size, nb_par_bits]) # (9, k_ldpc - k) parity bits 
-        print("x2: ", x2.shape)
+        # print("x2: ", x2.shape)
 
         # negative sign due to logit definition
         z = -tf.cast(self._llr_max, self._output_dtype) \
             * tf.ones([batch_size, k_filler], self._output_dtype) # 9, m_ldpc) filler bits
-        print("z: ", z.shape, z)
+        # print("z: ", z.shape, z)
 
         # Completed llr turned into (n_ldpc,1) vector
         ###############
         llr_5g = tf.concat([x1, z, x2], 1) 
-        print("llr_5g: ", llr_5g.shape, " n_ldpc: ", self.encoder._n_ldpc)
+        # print("llr_5g: ", llr_5g.shape, " n_ldpc: ", self.encoder._n_ldpc)
         ###############
         
         #######################################################################################
@@ -1376,19 +1376,19 @@ class LDPC5GDecoder(LDPCBPDecoder):
         # if self._return_infobits: # return only info bits
         # reconstruct u_hat # code is systematic
         u_hat = tf.slice(x_hat, [0,0], [batch_size, self.encoder.k])
-        print("x_hat: ", x_hat.shape, x_hat)
-        print("u_hat: ", u_hat.shape)
+        # print("x_hat: ", x_hat.shape, x_hat)
+        # print("u_hat: ", u_hat.shape)
         
         # Reshape u_hat so that it matches the original input dimensions
         output_shape = list(llr_ch_shape[0:-1]) + [self.encoder.k]
         output_shape[0] = -1 # overwrite first dimension as this could be None (Keras)
         u_reshaped = tf.reshape(u_hat, output_shape)
-        print("u_reshaped: ", u_reshaped.shape)
+        # print("u_reshaped: ", u_reshaped.shape)
 
         # enable other output datatypes than tf.float32
         u_out = tf.cast(u_reshaped, self._output_dtype)
-        print("u_out: ", u_out.shape)
-        print("###############################################")
+        # print("u_out: ", u_out.shape)
+        # print("###############################################")
 
             # if not self._stateful:
             #     return u_out
@@ -1401,7 +1401,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
 
         # remove last dim
         x = tf.reshape(x_hat, [batch_size, self._n_pruned])
-        print("x: ", x.shape)
+        # print("x: ", x.shape)
 
         # remove filler bits at pos (k, k_ldpc)
         x_no_filler1 = tf.slice(x, [0, 0], [batch_size, self.encoder.k])
@@ -1410,34 +1410,34 @@ class LDPC5GDecoder(LDPCBPDecoder):
                                 [0, self.encoder.k_ldpc],
                                 [batch_size,
                                 self._n_pruned-self.encoder.k_ldpc])
-        print("x_no_filler1: ", x_no_filler1.shape) 
-        print("x_no_filler2: ", x_no_filler2.shape) 
+        # print("x_no_filler1: ", x_no_filler1.shape) 
+        # print("x_no_filler2: ", x_no_filler2.shape) 
 
         x_no_filler = tf.concat([x_no_filler1, x_no_filler2], 1)
-        print("x_no_filler: ", x_no_filler.shape) 
+        # print("x_no_filler: ", x_no_filler.shape) 
 
         # shorten the first 2*Z positions and end after n bits
         x_short = tf.slice(x_no_filler,
                            [0, 2*self.encoder.z],
                            [batch_size, self.encoder.n])
-        print("x_short: ", x_short.shape)
+        # print("x_short: ", x_short.shape)
 
         # if used, apply rate-matching output interleaver again as
         # Sec. 5.4.2.2 in 38.212
         if self._encoder.num_bits_per_symbol is not None:
             x_short = tf.gather(x_short, self._encoder.out_int, axis=-1)
-        print("x_short: ", x_short.shape)
+        # print("x_short: ", x_short.shape)
 
         # Reshape x_short so that it matches the original input dimensions
         # overwrite first dimension as this could be None (Keras)
         llr_ch_shape = list(llr_ch_shape.as_list())
         llr_ch_shape[0] = -1
         x_short= tf.reshape(x_short, llr_ch_shape)
-        print("x_short: ", x_short.shape)
+        # print("x_short: ", x_short.shape)
 
         # enable other output datatypes than tf.float32
         x_out = tf.cast(x_short, self._output_dtype)
-        print("x_out: ", x_out.shape)
+        # print("x_out: ", x_out.shape)
             
         #     if not self._stateful:
         #         return x_out
