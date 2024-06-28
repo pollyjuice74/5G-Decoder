@@ -987,8 +987,8 @@ class LDPCBPDecoder(Layer):
 
         x_hat = -1. * x_hat # convert llrs back into logits
 
-        if self._hard_out: # hard decide decoder output if required
-            x_hat = tf.cast(tf.less(0.0, x_hat), self._output_dtype)
+        # if self._hard_out: # hard decide decoder output if required
+        #     x_hat = tf.cast(tf.less(0.0, x_hat), self._output_dtype)
         print("x_hat: ", x_hat.shape, x_hat)
 
         # Reshape c_short so that it matches the original input dimensions
