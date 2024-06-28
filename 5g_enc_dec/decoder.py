@@ -262,7 +262,7 @@ class LDPCBPDecoder(Layer):
                  pcm,
                  trainable=False,
                  cn_type='boxplus-phi',
-                 hard_out=True,
+                 hard_out=False,
                  track_exit=False,
                  num_iter=20,
                  stateful=False,
