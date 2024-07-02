@@ -69,6 +69,41 @@
 
 
 
-class Channel:
-  def __init__(self, generator, discriminator):
-    pass
+class Channel(tf.keras.Model):
+    def __init__(self, generator, discriminator):
+        self.gen = generator 
+        self.dis = discriminator # ADD trainable/not-trainable option 
+        
+
+    def call(self, H, c, z=0):
+        z_G = self.gen(H, c, z)
+        r = c + z + z_G if z else c + z_G # z could be structured noise process or only the generator creates noise
+        
+        c_hat, z_hat = self.dis(r)
+
+        ber = BER(c_hat, c)
+        fer = FER(c_hat, c)
+
+        loss_gen = self.loss_gen(ber, fer, z_G) # performance of the decoder, noise created
+        loss_dis = self.loss_dis(c_hat, c)
+        
+        return c, c_hat #, ber, fer, z_G
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
