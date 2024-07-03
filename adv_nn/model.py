@@ -48,7 +48,26 @@ class Discriminator(Layer):
         pass
         
     def call(self, r):
-        emb = 
+        for i in range(self.pcm.shape[0]):
+            c_hat, z_hat,  t = self.diff_call(r)
+            
+            if (c_hat @ self.pcm)==0:
+                return c_hat, z_hat, i            
+        return c_hat, z_hat, i
+
+    # Refines r
+    def diff_call(self, rt): 
+        t = # ix for the 'time step' t in the diffusion
+        if self.line_search:
+            l = self.line_search()
+        return rt_1, z_hat, t # r at time t-1
+
+    # optimal lambda l for theoretical and for error prediction
+    def line_search(self):
+        pass
+        
+    # Extracts noise z of r
+    def tran_call(self, r):
         return c_hat, z_hat
 
 
