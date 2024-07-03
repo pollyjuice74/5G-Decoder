@@ -45,22 +45,29 @@ class Generator(Layer):
 
 class Discriminator(Layer):
     def __init__(self):
-        pass
+        self.beta 
+        self.betas_bar
         
-    def call(self, r):
+    def call(self, r_t):
         for i in range(self.pcm.shape[0]):
-            c_hat, z_hat,  t = self.diff_call(r)
+            r_t, z_hat,  t = self.diff_call(r_t)
             
-            if (c_hat @ self.pcm)==0:
+            if (r @ self.pcm)==0:
                 return c_hat, z_hat, i            
         return c_hat, z_hat, i
 
-    # Refines r
-    def diff_call(self, rt): 
-        t = # ix for the 'time step' t in the diffusion
-        if self.line_search:
-            l = self.line_search()
-        return rt_1, z_hat, t # r at time t-1
+    # Refines recieved codeword r at time t
+    def diff_call(self, r_t): 
+        t = # ix for the 'time step' t in the diffusion # 'time step' t is really a error estimate of the syndrome
+        c_hat, z_hat = self.tran_call(r_t)
+        
+        l = self.line_search() if self.ls_active else 1.
+        factor = ( self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) ) # theoretical step size
+        err_hat = r_t - tf.sign(z_hat*rt)
+
+        r_t1 = r_t - (l * factor * err_hat) # refined estimate of the codeword for the diffusion step
+
+        return r_t1 z_hat, t # r at time t-1
 
     # optimal lambda l for theoretical and for error prediction
     def line_search(self):
