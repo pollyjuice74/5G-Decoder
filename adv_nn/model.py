@@ -53,14 +53,14 @@ class Discriminator(Layer):
         
     def call(self, r_t):
         for i in range(self.pcm.shape[0]):
-            r_t, z_hat,  t = self.diff_call(r_t)
+            r_t, z_hat,  t = self.rev_diff_call(r_t)
             
             if (r_t @ self.pcm)==0:
                 return r_t, z_hat, i            
         return r_t, z_hat, i
 
     # Refines recieved codeword r at time t
-    def diff_call(self, r_t): 
+    def rev_diff_call(self, r_t): 
         t = ( self.pcm @ to_bin(r_t) ).sum() # ix for the 'time step' t in the diffusion # 'time step' t is really a error estimate of the syndrome
         c_hat, z_hat = self.tran_call(r_t, t)
         
