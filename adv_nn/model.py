@@ -44,37 +44,51 @@ class Generator(Layer):
     # that will be trying to fool it. 
 
 class Discriminator(Layer):
-    def __init__(self):
+    def __init__(self, ls_active=True):
         self.beta 
         self.betas_bar
+        self.ls_active = ls_active
+
+        self.
         
     def call(self, r_t):
         for i in range(self.pcm.shape[0]):
             r_t, z_hat,  t = self.diff_call(r_t)
             
-            if (r @ self.pcm)==0:
-                return c_hat, z_hat, i            
-        return c_hat, z_hat, i
+            if (r_t @ self.pcm)==0:
+                return r_t, z_hat, i            
+        return r_t, z_hat, i
 
     # Refines recieved codeword r at time t
     def diff_call(self, r_t): 
-        t = # ix for the 'time step' t in the diffusion # 'time step' t is really a error estimate of the syndrome
-        c_hat, z_hat = self.tran_call(r_t)
+        t = ( self.pcm @ to_bin(r_t) ).sum() # ix for the 'time step' t in the diffusion # 'time step' t is really a error estimate of the syndrome
+        c_hat, z_hat = self.tran_call(r_t, t)
         
         l = self.line_search() if self.ls_active else 1.
         factor = ( self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) ) # theoretical step size
         err_hat = r_t - tf.sign(z_hat*rt)
 
         r_t1 = r_t - (l * factor * err_hat) # refined estimate of the codeword for the diffusion step
-
-        return r_t1 z_hat, t # r at time t-1
+        # r_t1[t==0] = r_t[t==0] # if cw has 0 synd. keep as is
+        return r_t1, z_hat, t # r at time t-1
 
     # optimal lambda l for theoretical and for error prediction
     def line_search(self):
         pass
         
     # Extracts noise z of r
-    def tran_call(self, r):
+    def tran_call(self, r_t, t):
+        syndrome = self.pcm @ to_bin(r_t) #(m,1) check nodes
+        magnitude = tf.abs(r_t) #(n,1) variable nodes
+
+        nodes = tf.concat([magnitude, syndrome]) # data for vertices, shape (n+m,1)
+        
+        emb = self.src_emb * nodes
+        time_emb = self.time_embed(t) 
+        
+        emb_t = time_emb * emb
+        self.decoder(emb_t, self.mask, time_emb)
+        
         return c_hat, z_hat
 
 
