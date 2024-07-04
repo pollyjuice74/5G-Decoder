@@ -24,7 +24,7 @@ https://arxiv.org/pdf/2006.04768
 
 https://arxiv.org/pdf/1905.07799
 
-- Diffusion optimal time complexity
+- Diffusion optimal time complexity (spliting numerical methods)
 
 https://arxiv.org/pdf/2301.11558
 
