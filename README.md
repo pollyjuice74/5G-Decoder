@@ -16,6 +16,21 @@
 https://nvlabs.github.io/sionna/_modules/sionna/fec/ldpc/encoding.html#LDPC5GEncoder Source Code
 
 --- 
+- Transformer optimal time complexity (Linformer)
+
+https://arxiv.org/pdf/2006.04768
+
+- Transformer most accurate
+
+https://arxiv.org/pdf/1905.07799
+
+- Diffusion optimal time complexity
+
+https://arxiv.org/pdf/2301.11558
+
+- Diffusion memory efficient
+
+https://arxiv.org/pdf/2010.02502
 
 - Generative Adversarial Network variants
 
