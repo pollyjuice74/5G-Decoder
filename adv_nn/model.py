@@ -55,6 +55,7 @@ class Discriminator(Layer):
 
         self.src_embed
         self.time_embed
+        self.fc
         
     def call(self, r_t):
         for i in range(self.pcm.shape[0]):
@@ -81,7 +82,7 @@ class Discriminator(Layer):
     def line_search(self):
         pass
         
-    # Extracts noise estimate z_hat of r
+    # Extracts noise estimate z_hat from r
     def tran_call(self, r_t, t):
         syndrome = self.pcm @ to_bin(r_t) #(m,1) check nodes
         magnitude = tf.abs(r_t) #(n,1) variable nodes
@@ -92,8 +93,8 @@ class Discriminator(Layer):
         time_emb = self.time_embed(t) 
         
         emb_t = time_emb * emb
-        self.decoder(emb_t, self.mask, time_emb)
-        
+        emb_t = self.decoder(emb_t, self.mask, time_emb)
+        z_hat = self.fc(emb_t)
         return z_hat
 
 
