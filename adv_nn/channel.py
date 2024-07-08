@@ -59,7 +59,7 @@
 # Actions:
     # G's z_G is constrained by some ability to fool D (make D have more errors than with standard AWGN), 
         # by some factor and by some standard deviation.
-    # D's c_hat, z_hat are constrained by some ability to decode an r = z + z_G, 
+    # D's c_hat, z_hat are constrained by some ability to decode an r = c + z + z_G, 
         # into a very close aproximation of c and z 
 
 # Knowledge: 
