@@ -65,7 +65,7 @@
 # Knowledge: 
     # H is common knowledge to both parties, 
     # c,z are known to G but not D, 
-    # r is known to D.
+    # r is known to D and G.
 
 
 
