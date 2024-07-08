@@ -3,6 +3,11 @@ from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.initializers import GlorotUniform
 
 
+class FeedForward(tf.keras.layers.Layer):
+    def __init__(self):
+        
+
+
 class MHAttention(tf.keras.layers.Layer):
     def __init__(self, dims, heads, linear=True, k=256):
         super().__init__()
