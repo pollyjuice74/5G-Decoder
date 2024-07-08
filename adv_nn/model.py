@@ -80,7 +80,7 @@ class Discriminator(Layer):
     def line_search(self):
         pass
         
-    # Extracts noise z of r
+    # Extracts noise estimate z_hat of r
     def tran_call(self, r_t, t):
         syndrome = self.pcm @ to_bin(r_t) #(m,1) check nodes
         magnitude = tf.abs(r_t) #(n,1) variable nodes
