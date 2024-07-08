@@ -53,7 +53,8 @@ class Discriminator(Layer):
         self.betas_bar
         self.ls_active = ls_active
 
-        self.
+        self.src_embed
+        self.time_embed
         
     def call(self, r_t):
         for i in range(self.pcm.shape[0]):
