@@ -57,5 +57,17 @@ class MHAttention(tf.keras.layers.Layer):
         return self.to_out(out)
 
     def attention(self, mask): # O(n^2)
+        b,n,_ = tf.shape(x)
         query, key, val = self.to_q(x), self.to_k(x), self.to_v(x)
-        pass
+        query, key, val = [ tf.reshape(x, (b, n, self.heads, self.dim_head)) for x in [query, key, val] ]
+        query, key, val = [ tf.transpose(x, [0, 2, 1, 3]) for x in [query, key, val] ]
+
+        scores = tf.einsum('bhnd,bhnd->bhnn', query, key) / (tf.sqrt(self.dim_head))
+        scores += (mask * -1e9) if mask is not None else 0.
+        attn = tf.nn.softmax(scores, axis=-1) #-1 
+        attn = self.dropout(attn)
+        out = tf.einsum('bhnn,bhnm->bhnd', attn, v)
+
+        out = tf.transpose(out, [0, 2, 1, 3])
+        out = tf.reshape(out, (b, n, -1))
+        return self.to_out(out)
