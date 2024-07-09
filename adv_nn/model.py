@@ -29,16 +29,14 @@ class Args():
         self.model_type = model_type
         self.code_type = code_type
         self.code = self.get_code(n,k)
+        self.mask = create_mask(H)
+        
         self.ls_active = True
         self.sigma = sigma
-      
         self.beta_steps = beta_steps
-        self.N_steps = code.pc_matrix.shape[0]+5  ###################### Number of diffusion steps
-
-        self.d_model = d_model
         self.t_layers = t_layers # transformer layers
-
-        self.mask = create_mask(H)
+        self.d_model = d_model
+        self.N_steps = self.code.H.shape[0]+5 # Number of diffusion steps
     
     def create_mask(self):
         H = self.code.H
