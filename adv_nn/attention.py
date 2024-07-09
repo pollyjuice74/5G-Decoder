@@ -1,10 +1,10 @@
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.layers import Dense, Dropout, LayerNormalization, Layer
 from tensorflow.keras.initializers import GlorotUniform
 from tensorflow.keras.activations import gelu
 
 
-class FeedForward(tf.keras.layers.Layer):
+class FeedForward(Layer):
     def __init__(self, dim, mult=4, activation=None, dropout=0.01):
         self.w1 = Dense(dim * mult)
         self.w2 = Dense(dim)
@@ -15,14 +15,16 @@ class FeedForward(tf.keras.layers.Layer):
         x = self.act(self.w1(x))
         return self.w2(self.dropout(x))
 
-class PreNorm():
-    def __init__(self, dim, mult=4, activation=None, dropout=0.01):
-        pass
+class PreNorm(Layer):
+    def __init__(self, dropout=0.01):
+        self.norm = LayerNormalization()
+        self.dropout = Dropout(dropout)
         
-    def call(self):
-        pass
+    def call(self, x, sublayer):
+        x = sublayer(self.norm(x))
+        return self.dropout(x)
 
-class MHAttention(tf.keras.layers.Layer):
+class MHAttention(Layer):
     def __init__(self, dims, heads, linear=True, k=256, dropout=0.01):
         super().__init__()
         assert (dims % heads) == 0, 'dimension must be divisible by the number of heads'
