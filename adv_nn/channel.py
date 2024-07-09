@@ -1,3 +1,4 @@
+import tensorflow as tf
 # pytorch or tensorflow?
 
 # Channel should take in a generator G() (n,n), discriminator D() (n,n), codeword c (n,1), noise z (n,1), pcm H (m,n), 
