@@ -40,6 +40,7 @@ class Args():
     
     def create_mask(self):
         H = self.code.H
+        H_mask = H
         return H_mask
 
     def get_code(self, n, k):
