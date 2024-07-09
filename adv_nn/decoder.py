@@ -1,7 +1,8 @@
 import tensorflow as tf
-from attention import *
 import copy
 c = lambda x: copy.deepcopy(x)
+
+from attention import *
 
 
 class Transformer(tf.keras.layers.Layer):
