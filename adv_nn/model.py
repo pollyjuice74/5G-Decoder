@@ -1,14 +1,8 @@
-import torch
-import torch.nn.functional as F
-from torch_geometric.nn import GPSConv
-from torch_geometric.data import Data
-
 import tensorflow as tf
 from tensorflow.keras.layers import Layer, Embedding, Dense
 import numpy as np
 
 from decoder import * 
-
 
 ## Generative Adversarial Network approach
 
@@ -25,7 +19,7 @@ class DataSet():
         pass
 
 
-class Args(Data):
+class Args():
     def __init__(self, type, ls_active=True, beta_steps=10, t_layers=1, sigma):
         
         assert type in ["gen", "dis"] "Type must be: 'gen', Generator or 'dis', Discriminator."
@@ -34,10 +28,10 @@ class Args(Data):
         self.code = code
         
         self.ls_active = True
-        self.beta_steps
-        self.sigma
+        self.beta_steps = beta_steps
+        self.sigma = sigma
 
-        self.d_model
+        self.d_model = d_model
         self.t_layers = t_layers # transformer layers
 
         self.mask = create_mask(H)
@@ -50,7 +44,7 @@ class Args(Data):
     # contains diffusion computations, line search and creates mask of pcm.
 
 class TransformerDiffusion():
-    def __init__(self, args):
+    def __init__(self):
         pass
 
     # optimal lambda l for theoretical and for error prediction
@@ -134,7 +128,10 @@ class Generator(Layer):
         emb = 
         return z
 
-    def fwd_dif_call(self,):
+    def fwd_diff_call(self,):
+        pass
+        
+    def fwd_tran_call(self,):
         pass
 
         
