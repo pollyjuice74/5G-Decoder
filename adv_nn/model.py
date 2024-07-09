@@ -22,7 +22,7 @@ class DataSet():
 class Args():
     def __init__(self, type, sigma, ls_active=True, beta_steps=10, t_layers=1,):
         
-        assert type in ["gen", "dis"] "Type must be: 'gen', Generator or 'dis', Discriminator."
+        assert type in ["gen", "dis"], "Type must be: 'gen', Generator or 'dis', Discriminator."
         self.type = type
 
         self.code = code
