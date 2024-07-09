@@ -15,6 +15,12 @@ class FeedForward(tf.keras.layers.Layer):
         x = self.act(self.w1(x))
         return self.w2(self.dropout(x))
 
+class PreNorm():
+    def __init__(self, dim, mult=4, activation=None, dropout=0.01):
+        pass
+        
+    def call(self):
+        pass
 
 class MHAttention(tf.keras.layers.Layer):
     def __init__(self, dims, heads, linear=True, k=256, dropout=0.01):
