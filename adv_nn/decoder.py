@@ -17,9 +17,10 @@ class Transformer(tf.keras.layers.Layer):
 
 class TransformerLayer(tf.keras.layers.Layer):
     def __init__(self, attn, ff, norm, mask):
-        self.attn, self.ff = attn, ff, 
+        self.attn, self.ff = attn, ff
         self.norm1, self.norm2 = c(norm), c(norm)
+        self.mask = mask
 
     def call(self, x):
-        out = self.norm1(self.attn(x))
+        out = self.norm1( self.attn(x, self.mask) )
         return self.norm2(self.ff(out))
