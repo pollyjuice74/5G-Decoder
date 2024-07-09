@@ -1,3 +1,4 @@
+from attention import *
 import copy
 c = copy.deepcopy()
 
