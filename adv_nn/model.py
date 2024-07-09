@@ -7,6 +7,8 @@ import tensorflow as tf
 from tensorflow.keras.layers import Layer
 import numpy as np
 
+from decoder import * 
+
 ## Generative Adversarial Network approach
 
 # Should  use specifically 5G standard LDPC/Polar codes
@@ -70,17 +72,20 @@ class Discriminator(Layer):
         t = ( self.pcm @ to_bin(r_t) ).sum() # ix for the 'time step' t in the diffusion # 'time step' t is really a error estimate of the syndrome
         z_hat = self.tran_call(r_t, t)
         
-        l = self.line_search() if self.ls_active else 1.
         factor = ( self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) ) # theoretical step size
         err_hat = r_t - tf.sign(z_hat*rt)
+        l = self.line_search() if self.ls_active else 1.
 
         r_t1 = r_t - (l * factor * err_hat) # refined estimate of the codeword for the diffusion step
         # r_t1[t==0] = r_t[t==0] # if cw has 0 synd. keep as is
         return r_t1, z_hat, t # r at time t-1
 
     # optimal lambda l for theoretical and for error prediction
-    def line_search(self):
-        pass
+    def line_search(self, factor, err_hat):
+        l_values = tf.linespace(1., 20., 20).reshape(1,1,20)
+        syndromes = to_bin(r_t - l_values*(factor*err_hat)) @ self.pcm
+        ix = syndromes.argmin() # get the index of the min syndrome
+        return l_values[ix]
         
     # Extracts noise estimate z_hat from r
     def tran_call(self, r_t, t):
