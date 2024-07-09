@@ -22,14 +22,14 @@ class DataSet():
 
 
 class Args():
-    def __init__(self, model_type, code_type='LDPC', n=121, k=80, sigma=0.1, ls_active=True, beta_steps=10, t_layers=1,):
+    def __init__(self, model_type, code_type='LDPC', n=121, k=80,  ls_active=True, sigma=0.1, beta_steps=10, t_layers=1, d_model=8):
         assert model_type in ['gen', 'dis'], "Type must be: 'gen', Generator or 'dis', Discriminator."
         assert code_type in ['POLAR', 'BCH', 'CCSDS', 'LDPC', 'MACKAY'], "Invalid linear code type."
         
         self.model_type = model_type
         self.code_type = code_type
         self.code = self.get_code(n,k)
-        self.mask = self.create_mask(H)
+        self.mask = self.create_mask()
         
         self.ls_active = True
         self.sigma = sigma
@@ -53,7 +53,7 @@ class Args():
         G, H = Get_Generator_and_Parity(code)
         code.G, code.H = tf.convert_to_tensor(G), tf.convert_to_tensor(H)
         return code
-    
+        
 
 # Base model for the Generator and Discriminator models, 
     # contains diffusion computations, line search and creates mask of pcm.
