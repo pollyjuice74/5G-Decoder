@@ -42,15 +42,15 @@ class TransformerDiffusion():
 
 class Discriminator(TransformerDiffusion):
     def __init__(self, args):
-        self.betas = tf.linespace(1e-3, 1e-2, args.beta_steps)*0 + args.sigma 
+        self.betas = tf.linspace(1e-3, 1e-2, args.beta_steps)*0 + args.sigma 
         self.betas_bar = tf.math.cumsum(self.betas, 0)
         self.ls_active = args.ls_active
         code = args.code
         
-        self.src_embed = tf.Variable( tf.random.uniform(code.n + code.m, args.d_model), trainable=True )
+        self.src_embed = tf.Variable( tf.random.uniform([code.n + code.m, args.d_model]), trainable=True )
         self.decoder = Transformer(args.mask, args.t_layers)
-        self.fc = tf.keras.Sequential([ Dense(args.d_model, 1) ])
-        self.to_n = Dense(code.n + code.m, code.n) 
+        self.fc = tf.keras.Sequential([ Dense(1) ])
+        self.to_n = Dense(code.n + code.m) 
         self.time_embed = Embedding(args.beta_steps, args.d_model)
        
     def call(self, r_t):
