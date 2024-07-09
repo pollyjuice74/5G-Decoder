@@ -29,7 +29,7 @@ class Args():
         self.model_type = model_type
         self.code_type = code_type
         self.code = self.get_code(n,k)
-        self.mask = create_mask(H)
+        self.mask = self.create_mask(H)
         
         self.ls_active = True
         self.sigma = sigma
