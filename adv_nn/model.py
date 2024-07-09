@@ -125,8 +125,9 @@ class Generator(Layer):
         pass
 
     def call(self, c):
-        emb = 
-        return z
+        pass
+        # emb = 
+        # return z
 
     def fwd_diff_call(self,):
         pass
