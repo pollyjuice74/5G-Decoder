@@ -15,14 +15,15 @@ class FeedForward(Layer):
         x = self.act(self.w1(x))
         return self.w2(self.dropout(x))
 
+
 class PreNorm(Layer):
     def __init__(self, dropout=0.01):
         self.norm = LayerNormalization()
         self.dropout = Dropout(dropout)
         
-    def call(self, x, sublayer):
-        x = sublayer(self.norm(x))
-        return self.dropout(x)
+    def call(self, x):
+        return self.norm(self.dropout(x))
+
 
 class MHAttention(Layer):
     def __init__(self, dims, heads, linear=True, k=256, dropout=0.01):
