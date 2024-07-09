@@ -1,3 +1,4 @@
+import tensorflow as tf
 from attention import *
 import copy
 c = copy.deepcopy()
