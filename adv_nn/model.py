@@ -113,6 +113,7 @@ class Args():
             pass
         code = Code()
         code.n, code.k = n, k
+        code.m = n - k
         code.code_type = self.code_type
     
         G, H = Get_Generator_and_Parity(code)
