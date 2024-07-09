@@ -38,7 +38,7 @@ class Args(Data):
         self.t_layers = t_layers # transformer layers
     
 
-class BaseDecoder():
+class TransformerDiffusion():
     def __init__(self, args):
         self.betas = tf.linespace(1e-3, 1e-2, args.beta_steps)*0 + args.sigma 
         self.betas_bar = tf.math.cumsum(self.betas, 0)
