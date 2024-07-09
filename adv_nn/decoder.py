@@ -6,7 +6,7 @@ from attention import *
 
 
 class Transformer(tf.keras.layers.Layer):
-    def init(self, mask, N):
+    def __init__(self, mask, N):
       self.transformer_layers = [ TransformerLayer(MHAttention, FeedForward, PreNorm, mask) for _ in range(N) ]
 
     def call(self, x):
@@ -16,7 +16,7 @@ class Transformer(tf.keras.layers.Layer):
 
 
 class TransformerLayer(tf.keras.layers.Layer):
-    def init(self, attn, ff, norm, mask):
+    def __init__(self, attn, ff, norm, mask):
         self.attn, self.ff = attn, ff, 
         self.norm1, self.norm2 = c(norm), c(norm)
 
