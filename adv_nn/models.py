@@ -66,11 +66,11 @@ class Discriminator(TransformerDiffusion):
         t = ( self.pcm @ to_bin(r_t) ).sum() # ix for the 'time step' t in the diffusion # 'time step' t is really a error estimate of the syndrome ###
         z_hat = self.rev_tran_call(r_t, t)
         
-        factor = ( self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) ) # theoretical step size
+        sigma = ( self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) ) # theoretical step size
         err_hat = r_t - tf.sign(z_hat*rt)
         l = self.line_search() if self.ls_active else 1.
     
-        r_t1 = r_t - (l * factor * err_hat) # refined estimate of the codeword for the diffusion step
+        r_t1 = r_t - (l * sigma * err_hat) # refined estimate of the codeword for the diffusion step
         # r_t1[t==0] = r_t[t==0] # if cw has 0 synd. keep as is
         return r_t1, z_hat, t # r at time t-1
 
@@ -106,9 +106,16 @@ class Generator(Layer):
         # emb = 
         # return z
 
-    def fwd_diff_call(self,):
-        print ("hi mario")
-        pass
+    def fwd_diff_call(self, x_0):
+        x_t = x_0
+        z = self.fwd_tran_call()
+        
+        err = 
+        sigma = 
+        l = 
+        
+        x_t1 =  x_t + (l * sigma * err)
+        return x_t1
         
     def fwd_tran_call(self,):
         pass
