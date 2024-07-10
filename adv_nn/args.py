@@ -9,6 +9,8 @@ class Args():
         
         self.model_type = model_type
         self.code_type = code_type
+        self.k, self.n = k, n
+        self.m = n - k
         self.code = self.get_code(n,k)
         self.mask = self.create_mask()
         
