@@ -4,7 +4,7 @@ Contains implementation a **tensorflow** implementation for scalability of a `Di
 and generator adds noise `z_G` to a codeword `c` such that it will increase the discriminator's `BER` performance 
 on a given `EbN0` signal to noise ratio. 
 
-The `Discriminator` is implemented using low-rank projections and splitting numerical methods to improve the time complexity 
+The `Discriminator` is implemented using low-rank projections and splitting numerical methods to decrease the time complexity 
 of the transformer and diffusion respectively such that it will have competetive time complity with existing GNN/BP 5G 
 decoding approaches. 
 
