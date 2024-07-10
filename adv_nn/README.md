@@ -14,11 +14,15 @@ The `Generator` is implemented similarly.
 
 ## Overview
 
-- `models.py` Discriminator and Generator models. 
-- `attention.py` low-rank projection implementation of attention with `O( (n+m)d * |edges(H)| )`.
-- `decoder.py` transformer class.
-- `dataset.py` dataset with dataset types: zero_cw, ones_m, flip_cw, random_bits.
+- `LinearTranDiff.ipynb` running Discriminator on datasets and making sure layers work properly.
+
+- `models.py` Discriminator and Generator models.
 - `channel.py` end-to-end channel between Discriminator and Generator.
+  
+- `decoder.py` transformer class.
+- `attention.py` low-rank projection implementation of attention with `O( (n+m)d * |edges(H)| )`.
+
+- `dataset.py` dataset with dataset types: zero_cw, ones_m, flip_cw, random_bits.
 - `args.py` class holding arguments for the models and datasets.
 
 ## Resources
