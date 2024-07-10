@@ -3,7 +3,7 @@ import random
 
 
 class FEC_Dataset(tf.data.Dataset):
-    def __new__(cls, code, sigma=0.1, length=500, zero_cw=True, ones_m=False, flip_cw=False):
+    def __new__(cls, code, sigma=0.1, length=250, zero_cw=True, ones_m=False, flip_cw=False):
         k, n = code.k, code.n
         specs = [ tf.TensorSpec(shape=(k if i==0 else \
                                        n-k if i==7 else \
