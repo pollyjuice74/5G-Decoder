@@ -107,6 +107,7 @@ class Generator(Layer):
         # return z
 
     def fwd_diff_call(self,):
+        print ("hi mario")
         pass
         
     def fwd_tran_call(self,):
