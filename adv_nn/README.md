@@ -6,7 +6,7 @@ on a given `EbN0` signal to noise ratio.
 
 The `Discriminator` is implemented using low-rank projections and splitting numerical methods to decrease the time complexity 
 of the transformer and diffusion respectively such that it will have competetive time complity with existing GNN/BP 5G 
-decoding approaches. 
+decoding approaches of `O( Iterations * |edges(H)| )`. 
 
 The `Generator` is implemented similarly.
 
