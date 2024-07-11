@@ -3,17 +3,19 @@ from metrics import BitErrorRate as ber
 
 
 def train_dis(model, train_loader, optimizer, epoch, LR):
+    loss_fn = tf.keras.losses.BinaryCrossentropy()
     t = time.time()
     
     for batch_idx, (m, x, z, y, magnitude, syndrome) in enumerate(train_loader):
         with tf.GradientTape() as tape:
-            loss = model.train(x)
+            z_hat, z_mul = model.train(x)
+            loss = loss_fn(z_hat, z_mul)
             
         gradients = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
         if (batch_idx + 1) % 10 == 0 or batch_idx == len(train_loader) - 1:
-            print(f'Training epoch {epoch}, Batch {batch_idx + 1}/{len(train_loader)}: LR={LR:.2e}, Loss={cum_loss / cum_samples:.5e}')
+            print(f'Training epoch {epoch}, Batch {batch_idx + 1}/{len(train_loader)}: LR={LR:.2e}, Loss={loss.numpy():.5e}')
             
     print(f'Epoch {epoch} Train Time {time.time() - t}s\n')
             
