@@ -4,8 +4,6 @@ import numpy as np
 
 from decoder import * 
 
-from DDECC.src.codes import Get_Generator_and_Parity
-
 ## Generative Adversarial Network approach
 
 # Should  use specifically 5G standard LDPC/Polar codes
