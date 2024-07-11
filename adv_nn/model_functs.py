@@ -1,4 +1,4 @@
-# sionna source code, sionna.utils.metrics
+c# sionna source code, sionna.utils.metrics
 from metrics import compute_bler as bler
 from metrics import BitErrorRate as ber
 
@@ -11,7 +11,7 @@ def test_gen():
     pass
 
 
-def train_dis(model, train_loader, optimizer, epoch, LR):
+def train_dec(model, train_loader, optimizer, epoch, LR):
     loss_fn = tf.keras.losses.BinaryCrossentropy()
     t = time.time()
     
@@ -29,7 +29,7 @@ def train_dis(model, train_loader, optimizer, epoch, LR):
     print(f'Epoch {epoch} Train Time {time.time() - t}s\n')
             
 
-def test_dis(model, test_loader_list, EbNo_range_test, min_FER=100, max_cum_count=1e7, min_cum_count=1e5):
+def test_dec(model, test_loader_list, EbNo_range_test, min_FER=100, max_cum_count=1e7, min_cum_count=1e5):
     printed = False
     ber_list, bler_list = [], []
 
