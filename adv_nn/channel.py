@@ -3,12 +3,18 @@ from tensorflow.keras.losses import BinaryCrossentropy
 
 from models import *
 
+# sionna source code, sionna.utils.metrics
+from metrics import compute_bler as BLER
+from metrics import BitErrorRate as BER
 
-class Channel(tf.keras.Model):
-    def __init__(self, generator, discriminator, args):
-        self.gen = Generator(args) 
-        self.dis = Discriminator(args) # ADD trainable/not-trainable option 
+
+class GANChannel(tf.keras.Model):
+    def __init__(self, generator, decoder):
+        self.gen = generator
+        self.dec = decoder # ADD trainable/not-trainable option 
         self.bce = BinaryCrossentropy(from_logits=True) 
+        self.gen_optimizer = tf.keras.optimizers.Adam()
+        self.dec_optimizer = tf.keras.optimizers.Adam()
 
     # 'test' function
     def call(self, c, z=0):
@@ -25,11 +31,25 @@ class Channel(tf.keras.Model):
 
     def train(self, c, z):
         z_G, _, r = self.gen.train(c, struct_noise=z)
-        z_D, _, c_hat = self.dis.train(r)
+        z_hat, _, c_hat = self.dis.train(r)
+
+        with tf.GradientTape() as gen_tape, tf.GradientTape() as dec_tape:
+            ber = BER(c_hat, c)
+            loss_dec = self.bce(c_hat, c)
+            loss_gen = tf.reduce_mean(tf.square(ber - 1.0)) # Pulls BER to 1 and loss_dec up
+
+            # loss_dec is a small number                        
+            # loss_gen is a large number
+            #                         close to 0                           
+            loss = (1-loss_dec)*( np.log(1-loss_dec) ) + (loss_gen-1)*( np.log(1-loss_gen) )
+            
+        gradients_of_generator = gen_tape.gradient(loss_gen, self.gen.trainable_variables)
+        gradients_of_decoder = dec_tape.gradient(loss_dec, self.dec.trainable_variables)
+
+        self.gen_optimizer.apply_gradients(zip(gradients_of_generator, self.gen.trainable_variables))
+        self.dec_optimizer.apply_gradients(zip(gradients_of_decoder, self.dec.trainable_variables))   
         
-        loss_dis = self.loss_dis(c_hat, c)
-        loss_gen = self.loss_gen(ber, fer, z_G) # performance of the decoder, noise created
-        loss = loss_dis + loss_gen
+        return loss, loss_gen, loss_dec
 
 
 # pytorch or tensorflow?
