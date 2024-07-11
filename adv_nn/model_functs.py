@@ -2,6 +2,14 @@ from metrics import compute_bler as bler
 from metrics import BitErrorRate as ber
 
 
+def train_gen():
+    pass
+
+
+def test_gen():
+    pass
+
+
 def train_dis(model, train_loader, optimizer, epoch, LR):
     loss_fn = tf.keras.losses.BinaryCrossentropy()
     t = time.time()
