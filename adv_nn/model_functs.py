@@ -6,7 +6,7 @@ def train_dis(model, train_loader, optimizer, epoch, LR):
     loss_fn = tf.keras.losses.BinaryCrossentropy()
     t = time.time()
     
-    for batch_idx, (m, x, z, y, magnitude, syndrome) in enumerate(train_loader):
+    for batch_idx, (_, x, _, _, _, _) in enumerate(train_loader):
         with tf.GradientTape() as tape:
             z_hat, z_mul = model.train(x)
             loss = loss_fn(z_hat, z_mul)
