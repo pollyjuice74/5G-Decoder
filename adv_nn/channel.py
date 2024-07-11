@@ -1,4 +1,6 @@
 import tensorflow as tf
+from tensorflow.keras.losses import BinaryCrossentropy
+
 from models import *
 
 
@@ -6,7 +8,7 @@ class Channel(tf.keras.Model):
     def __init__(self, generator, discriminator, args):
         self.gen = Generator(args) 
         self.dis = Discriminator(args) # ADD trainable/not-trainable option 
-        self.loss_gen = self.loss_dis = tf.losses.BinaryCrossentropy() 
+        self.bce = BinaryCrossentropy(from_logits=True) 
 
     # 'test' function
     def call(self, c, z=0):
