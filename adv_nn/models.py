@@ -23,6 +23,7 @@ class TransformerDiffusion( Layer ):
     def __init__(self, args):
         super().__init__()
         code = args.code
+        self.n_steps = args.n_steps
         
         self.betas = tf.linspace(1e-3, 1e-2, args.beta_steps)*0 + args.sigma 
         self.betas_bar = tf.math.cumsum(self.betas, 0)
@@ -99,6 +100,8 @@ class Discriminator( TransformerDiffusion ):
 
     def train(self, x_0):
         t = tf.keras.random.randint( (x_0.shape[0] // 2 + 1,), minval=0,maxval=self.n_steps )
+        t = tf.concat([t, self.n_steps - t - 1], axis=0)[:x_0.shape[0]] # reshapes t to size x_0
+        t = tf.cast(t, dtype=tf.int32)
         
         z = tf.random.normal( (x_0.shape), stddev=self.get_sigma(t) )
         noise_factor = tf.math.sqrt(self.betas_bar[t])
