@@ -1,4 +1,4 @@
-# sionna source code sionna.utils.metrics
+# sionna source code, sionna.utils.metrics
 from metrics import compute_bler as bler
 from metrics import BitErrorRate as ber
 
