@@ -36,15 +36,15 @@ def test_dis(model, test_loader_list, EbNo_range_test, min_FER=100, max_cum_coun
     for ix, test_loader in enumerate(test_loader_list):
         for batch_ix, (m, c, z, r, _, _, magnitude, syndrome) in enumerate(test_loader):
             c_hat = model(r)
-            ber_list.append( ber(c, c_hat) )
-            bler_list.append( bler(c, c_hat) )
+            ber_list.append( ber(c, c_hat) ) # BER
+            bler_list.append( bler(c, c_hat) ) # BLER
             print(f'Test EbN0={EbNo_range_test[ix]}, BER={ber_list[-1]}')
             print(f'Test EbN0={EbNo_range_test[ix]}, BLER={bler_list[-1]}')
 
             if not printed:
-              print("c: ", c)
-              print("c_hat: ", c_hat)
-              printed = True
+                print("c: ", c)
+                print("c_hat: ", c_hat)
+                printed = True
             break
 
     return { "ber": ber_list, "bler": bler_list }
