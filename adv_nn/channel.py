@@ -34,14 +34,15 @@ class GANChannel(tf.keras.Model):
         z_hat, _, c_hat = self.dis.train(r)
 
         with tf.GradientTape() as gen_tape, tf.GradientTape() as dec_tape:
-            ber = BER(c_hat, c)
+            ber = BER(c_hat, c) # [0,1]
             loss_dec = self.bce(c_hat, c)
             loss_gen = tf.reduce_mean(tf.square(ber - 1.0)) # Pulls BER to 1 and loss_dec up
+            gen_error = tf.sigmoid(loss_gen) ### [0,1]
 
             # loss_dec is a small number                        
             # loss_gen is a large number
             #                         close to 0                           
-            loss = (1-loss_dec)*( np.log(1-loss_dec) ) + (loss_gen-1)*( np.log(1-loss_gen) )
+            loss = (1-ber)*( np.log(1-ber) ) + (gen_error-1)*( np.log(1-gen_error) )
             
         gradients_of_generator = gen_tape.gradient(loss_gen, self.gen.trainable_variables)
         gradients_of_decoder = dec_tape.gradient(loss_dec, self.dec.trainable_variables)
