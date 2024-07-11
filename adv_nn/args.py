@@ -14,7 +14,6 @@ class Args():
         self.k, self.n = k, n
         self.m = n - k
         self.code = self.get_code(n,k)
-        self.mask = self.create_mask()
         
         self.ls_active = True
         self.sigma = sigma
@@ -28,11 +27,6 @@ class Args():
         self.testdata_len = testdata_len
 
         self.lr = lr
-    
-    def create_mask(self):
-        H = self.code.H
-        H_mask = H
-        return H_mask
 
     def get_code(self, n, k):
         class Code():
