@@ -89,13 +89,30 @@ class Discriminator( TransformerDiffusion ):
         t = ( self.pcm @ to_bin(r_t) ).sum() # ix for the 'time step' t in the diffusion # 'time step' t is really a error estimate of the syndrome ###
         z_hat = self.tran_call(r_t, t)
         
-        sigma = ( self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) ) # theoretical step size
+        sigma = self.get_sigma(t) # theoretical step size
         err_hat = r_t - tf.sign(z_hat*r_t)
         l = self.line_search(sigma, err_hat) if self.ls_active else 1.
     
         r_t1 = r_t - (l * sigma * err_hat) # refined estimate of the codeword for the diffusion step
         # r_t1[t==0] = r_t[t==0] # if cw has 0 synd. keep as is
         return r_t1, z_hat, t # r at time t-1
+
+    def train(self, x_0):
+        t = tf.keras.random.randint( (x_0.shape[0] // 2 + 1,), minval=0,maxval=self.n_steps )
+        
+        z = tf.random.normal( (x_0.shape), stddev=self.get_sigma(t) )
+        noise_factor = tf.math.sqrt(self.betas_bar[t])
+        h = tf.random.rayleigh( (x_0.shape) )
+        
+        x_t = h * x_0 + (z*noise_factor)
+        
+        sum_syn = tf.math.reduce_sum( (x_t @ self.pcm) % 2 ) # sum syndrome
+        z_hat = self.tran_call(x_t, sum_syn)
+        z_mul = x_t * x_0
+        return z_hat, to_bin(z_mul)
+
+    def get_sigma(self, t):
+        return ( self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) )
         
 
 # Construct generator (encoder using forward diffusion to simulate channel)
