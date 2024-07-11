@@ -17,6 +17,7 @@ The `Generator` is implemented similarly.
 - `LinearTranDiff.ipynb` running Discriminator on datasets and making sure layers work properly.
 
 - `models.py` Discriminator and Generator models.
+- `model_functs.py` train/test functions for models.
 - `channel.py` end-to-end channel between Discriminator and Generator.
   
 - `decoder.py` transformer class.
