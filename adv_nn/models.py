@@ -98,7 +98,7 @@ class TransformerDiffusion( Layer ):
         # use Linformer having a O(n) on top of already improved complexity using the pcm mask
         # use split diffusion to improve accuracy and efficiency by guiding model rather than EMA
 
-class Discriminator( TransformerDiffusion ):
+class Decoder( TransformerDiffusion ):
     def __init__(self):
         super().__init__()
 
