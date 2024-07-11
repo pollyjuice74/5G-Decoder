@@ -15,7 +15,7 @@ class FEC_Dataset(tf.data.Dataset):
         )
   
     @staticmethod
-    def _generator(G,H, k,n, sigma, length, zero_cw, ones_m, flip_cw):
+    def _generator(G,H, k,n, sigma, length, zero_cw, ones_m, flip_cw, sim_ampl=True):
         for _ in range(length):
             # raise print("Zero cw and all ones m are not compatible at the same time")
             if zero_cw is None and not ones_m:
@@ -37,15 +37,14 @@ class FEC_Dataset(tf.data.Dataset):
             # Make noise
             std_noise = random.choice(sigma)
             z = tf.random.normal((args.code.n,), std_noise)
+            h = tf.random.rayleigh((args.code.n,), std_noise) if sim_ampl else 1.  # simulates signal amplitude of multipath propagation signals
+            
             # Convert y to sign and add noise
-            h=1
             y = h*bin_to_sign(x) + z
 
-            # Sign to LLR conversion
-            var = std_noise ** 2
-
-            # x,y to llrs
             x = bin_to_sign(x)
+            var = std_noise ** 2
+            # x,y to llrs
             x_llr = sign_to_llr(x, var)
             y_llr = sign_to_llr(y, var)
 
