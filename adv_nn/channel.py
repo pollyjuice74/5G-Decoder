@@ -1,4 +1,35 @@
 import tensorflow as tf
+from models import *
+
+
+class Channel(tf.keras.Model):
+    def __init__(self, generator, discriminator, args):
+        self.gen = Generator(args) 
+        self.dis = Discriminator(args) # ADD trainable/not-trainable option 
+        self.loss_gen = self.loss_dis = tf.losses.BinaryCrossentropy() 
+
+    # 'test' function
+    def call(self, c, z=0):
+        z_G = self.gen(c, z)
+        r = c + z + z_G if z else c + z_G # z could be structured noise process or only the generator creates noise
+        
+        c_hat, z_hat, t, i = self.dis(r)
+
+        ber = BER(c_hat, c)
+        fer = BLER(c_hat, c)
+        print(f"ber: {ber}, bler: {bler}")
+
+        return c, c_hat, #data #, ber, fer, z_G
+
+    def train(self, c, z):
+        z_G, _, r = self.gen.train(c, struct_noise=z)
+        z_D, _, c_hat = self.dis.train(r)
+        
+        loss_dis = self.loss_dis(c_hat, c)
+        loss_gen = self.loss_gen(ber, fer, z_G) # performance of the decoder, noise created
+        loss = loss_dis + loss_gen
+
+
 # pytorch or tensorflow?
 
 # Channel should take in a generator G() (n,n), discriminator D() (n,n), codeword c (n,1), noise z (n,1), pcm H (m,n), 
@@ -67,44 +98,3 @@ import tensorflow as tf
     # H is common knowledge to both parties, 
     # c,z are known to G but not D, 
     # r is known to D and G.
-
-
-
-class Channel(tf.keras.Model):
-    def __init__(self, generator, discriminator):
-        self.gen = generator 
-        self.dis = discriminator # ADD trainable/not-trainable option 
-        
-
-    def call(self, H, c, z=0):
-        z_G = self.gen(H, c, z)
-        r = c + z + z_G if z else c + z_G # z could be structured noise process or only the generator creates noise
-        
-        c_hat, z_hat = self.dis(r)
-
-        ber = BER(c_hat, c)
-        fer = FER(c_hat, c)
-
-        loss_gen = self.loss_gen(ber, fer, z_G) # performance of the decoder, noise created
-        loss_dis = self.loss_dis(c_hat, c)
-        
-        return c, c_hat #, ber, fer, z_G
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
