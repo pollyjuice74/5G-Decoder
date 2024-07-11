@@ -43,9 +43,12 @@ def test_models():
 
     for ix, tst_dataset in enumerate(test_ebnos_datasets):
         print(f"\nTesting on {list(dataset_types.keys())[ix].upper()}")
+        
         print("Testing  Linear Transformer Diffusion Model...")
         data["LTDM"][ix] = test(dec, tst_dataset, EbNo_range_test, min_FER=50,max_cum_count=1e6,min_cum_count=1e4)
         return data
+
+
 
 #                         z_cw   m 1s   1-cw     Should use zero codeword by default
 dataset_types = {
