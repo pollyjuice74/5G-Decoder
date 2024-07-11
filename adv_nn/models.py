@@ -28,7 +28,7 @@ class TransformerDiffusion( Layer ):
         self.betas_bar = tf.math.cumsum(self.betas, 0)
         self.ls_active = args.ls_active
         
-        self.mask = self.create_mask(code.H)
+        self.mask = args.mask
         self.src_embed = tf.Variable( tf.random.uniform([code.n + code.m, args.d_model]), trainable=True )
         self.decoder = Transformer(args.mask, args.t_layers)
         self.fc = tf.keras.Sequential([ Dense(1) ])
@@ -59,10 +59,6 @@ class TransformerDiffusion( Layer ):
         emb_t = self.decoder(emb_t, self.mask, time_emb)
         z_hat = self.fc(emb_t)
         return z_hat 
-
-    def create_mask(self, H, n_ring=1):
-        H_mask = H
-        return H_mask
 
 
 # Construct discriminator (decoder using reverse diffusion)
