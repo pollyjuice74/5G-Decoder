@@ -7,7 +7,7 @@ class Args():
                        beta_steps=10, t_layers=1, d_model=8, lr=5e-4, batch_size=128, 
                        traindata_len=500, testdata_len=250, epochs=1000):
         assert model_type in ['gen', 'dis'], "Type must be: 'gen', Generator or 'dis', Discriminator."
-        assert code_type in ['POLAR', 'BCH', 'CCSDS', 'LDPC', 'MACKAY'], "Invalid linear code type."
+        assert code_type in ['POLAR', 'BCH', 'CCSDS', 'LDPC', 'MACKAY', 'LDPC5G', 'POLAR5G'], "Invalid linear code type."
         
         self.model_type = model_type
         self.code_type = code_type
@@ -30,14 +30,28 @@ class Args():
         self.lr = lr
 
     def get_code(self, n, k):
-        class Code():
-            pass
-        code = Code()
+        code = type('Code', (), {})() # class Code, no base class, no attributes/methods, () instantiate object
         code.n, code.k = n, k
         code.m = n - k
         code.code_type = self.code_type
     
-        G, H = Get_Generator_and_Parity(code)
-        code.G, code.H = tf.convert_to_tensor(G), tf.convert_to_tensor(H)
+        if self.code_type=='LDPC5G':
+            encoder = LDPC5GEncoder(k,n)
+            decoder = LDPC5GDecoder(encoder)
+            code.enc = encoder
+            code.dec = decoder # contains encoder
+            
+            H = encoder.pcm
+            
+        elif self.code_type=='POLAR5G':
+            pass
+            
+        else:
+            G, H = Get_Generator_and_Parity(code)
+            code.G, code.H = tf.convert_to_tensor(G), tf.convert_to_tensor(H)
+        
+        code.mask = self.create_mask(H)
         return code
+        
+    def create_mask():
         
