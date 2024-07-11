@@ -41,9 +41,11 @@ class TransformerDiffusion( Layer ):
         l_values = tf.linespace(1., 20., 20).reshape(1,1,20)
         syndromes = to_bin(r_t - l_values*(sigma*err_hat)) @ self.pcm
         
-        ix = syndromes.argmin() if model_type=='dis' else 
-             syndromes.argmax() if model_type=='gen' else 
-             raise "Invalid model type ".append(model_type) # get the index of the min syndrome
+        if model_type=='dis': 
+             ix = syndromes.argmin() 
+        else: 
+             ix = syndromes.argmax() 
+            
         return l_values[ix]
 
     # Extracts noise estimate z_hat from r
