@@ -13,8 +13,8 @@ class Args():
         self.code_type = code_type
         self.k, self.n = k, n
         self.m = n - k
-        self.code = self.get_code(n,k)
         self.n_rings = n_rings # ring connectivity of mask
+        self.code = self.get_code(n,k)
         
         self.ls_active = True
         self.sigma = sigma
@@ -50,10 +50,10 @@ class Args():
             G, H = Get_Generator_and_Parity(code)
             code.G, code.H = tf.convert_to_tensor(G), tf.convert_to_tensor(H)
         
-        code.mask = self.create_mask(H)
+        code.mask = self.create_mask(H, self.n_rings)
         return code
         
-    def create_mask(H, n_rings=1):
+    def create_mask(self, H, n_rings=1):
         m,n = H.shape
         mask = tf.eye(n+m, dtype=tf.float32)
         init_H = True
@@ -69,7 +69,7 @@ class Args():
         src_mask = tf.math.logical_not(tf.cast(mask > 0, dtype=tf.bool)) # not(mask > 0)
         return src_mask
 
-    def _extend_connectivity(mask, H=None, init_H=False):
+    def _extend_connectivity(self, mask, H=None, init_H=False):
         m,n = H.shape
         for i in range(n+m):
             indices = tf.where(H[i] > 0) if init_H else tf.where(mask[i] > 0)
