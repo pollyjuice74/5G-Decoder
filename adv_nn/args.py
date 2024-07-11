@@ -21,7 +21,7 @@ class Args():
         self.beta_steps = beta_steps
         self.t_layers = t_layers # transformer layers
         self.d_model = d_model
-        self.N_steps = self.code.H.shape[0]+5 # Number of diffusion steps
+        self.n_steps = self.code.H.shape[0]+5 # Number of diffusion steps
         self.epochs = epochs #
         self.batch_size = batch_size # chunks 
         self.traindata_len = traindata_len
