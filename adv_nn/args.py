@@ -53,7 +53,34 @@ class Args():
         code.mask = self.create_mask(H)
         return code
         
-    def create_mask(H, n_ring=1):
+    def create_mask(H, n_rings=1):
+        m,n = H.shape
+        mask = tf.eye(n+m, dtype=tf.float32)
+        init_H = True
+
+        for _ in range(n_rings):
+            mask = tf.identity(mask)
+            if init_H:
+                mask = self._extend_connectivity(mask, H, init_H=init_H) 
+                init_H = False
+            else: 
+                mask = self._extend_connectivity(mask, init_H=init_H)
+
+        src_mask = tf.math.logical_not(tf.cast(mask > 0, dtype=tf.bool)) # not(mask > 0)
+        return src_mask
+
+    def _extend_connectivity(mask, H=None, init_H=False):
+        m,n = H.shape
+        for i in range(n+m):
+            indices = tf.where(H[i] > 0) if init_H else tf.where(mask[i] > 0)
+            for j in indices:
+                j = j[0]
+                ixs = [ [j,n+i],[n+i,j] ] if init_H else [ [i,j],[j,i] ] 
+                mask = tf.tensor_scatter_nd_update(mask, ixs, [1.0, 1.0])
+                
+        return mask
+                
+        
         
 
 
