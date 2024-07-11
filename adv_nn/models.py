@@ -19,13 +19,16 @@ from DDECC.src.codes import Get_Generator_and_Parity
 # Base model for the Generator and Discriminator models, 
     # contains diffusion computations, line search and creates mask of pcm.
 
-class TransformerDiffusion(Layer):
+class TransformerDiffusion( Layer ):
     def __init__(self, args):
+        super().__init__()
+        code = args.code
+        
         self.betas = tf.linspace(1e-3, 1e-2, args.beta_steps)*0 + args.sigma 
         self.betas_bar = tf.math.cumsum(self.betas, 0)
         self.ls_active = args.ls_active
-        code = args.code
         
+        self.mask = self.create_mask(code.H)
         self.src_embed = tf.Variable( tf.random.uniform([code.n + code.m, args.d_model]), trainable=True )
         self.decoder = Transformer(args.mask, args.t_layers)
         self.fc = tf.keras.Sequential([ Dense(1) ])
@@ -56,6 +59,10 @@ class TransformerDiffusion(Layer):
         emb_t = self.decoder(emb_t, self.mask, time_emb)
         z_hat = self.fc(emb_t)
         return z_hat 
+
+    def create_mask(self, H, n_ring=1):
+        H_mask = H
+        return H_mask
 
 
 # Construct discriminator (decoder using reverse diffusion)
@@ -103,10 +110,13 @@ class Generator( TransformerDiffusion ):
     def __init__(self):
         super().__init__()
 
-    def call(self, c_t):
-       for i in range(self.pcm.shape[0]):
-           c_t, z_G = self.fwd_diff_call(c_t, z_G)          
-       return z_G
+    def call(self, c_0):
+        c_t = c_0
+        for i in range(self.pcm.shape[0]):
+            c_t, z_G = self.fwd_diff_call(c_t, z_G)   
+           
+        assert z_G==(c_t-c_0), "Cumulative z_G should be the same as c_t-c_0" 
+        return z_G
 
     def fwd_diff_call(self, c_t, z_G):
         t = ( self.pcm @ to_bin(r_t) ).sum()
