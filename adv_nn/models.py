@@ -126,10 +126,6 @@ class Discriminator( TransformerDiffusion ):
         # r_t1[t==0] = r_t[t==0] # if cw has 0 synd. keep as is
         return r_t1, z_hat, t # r at time t-1
 
-
-
-        
-
 # Construct generator (encoder using forward diffusion to simulate channel)
     # By simulating channel it will try to come up with ways to fool discriminator/decoder
     # through noising the original codeword
@@ -142,10 +138,9 @@ class Generator( TransformerDiffusion ):
         super().__init__()
 
     # 'test' function
-    def call(self, c_0):
+    def call(self, c_0, z):
         c_t = c_0
-        for i in range(self.pcm.shape[0]):
-            c_t, z_G = self.fwd_diff_call(c_t, z_G)   
+        c_t, z_G = self.fwd_diff_call(c_t, z)   
            
         assert z_G==(c_t-c_0), "Cumulative z_G should be the same as c_t-c_0" 
         return z_G
