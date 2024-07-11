@@ -71,23 +71,23 @@ class TransformerDiffusion( Layer ):
         t = tf.concat([t, self.n_steps - t - 1], axis=0)[:x_0.shape[0]] # reshapes t to size x_0
         t = tf.cast(t, dtype=tf.int32)
         
-        z = tf.random.normal( (x_0.shape) )
         noise_factor = tf.math.sqrt(self.betas_bar[t])
+        z = tf.random.normal( (x_0.shape) )
         h = tf.random.rayleigh( (x_0.shape) ) if sim_ampl else 1.
         
-        x_t = h * x_0 + (z*noise_factor)
+        x_t = h * x_0 + (z*noise_factor) # added noise to codeword
         sum_syn = tf.math.reduce_sum( (x_t @ self.pcm) % 2 ) # sum syndrome
         
-        z_hat = self.tran_call(x_t, sum_syn)
+        z_hat = self.tran_call(x_t, sum_syn) # model prediction
         
         if model_type=='dis':
-            z_mul = x_t * x_0
+            z_mul = x_t * x_0 # actual noise added through the channel
             
         elif model_type=='gen':
             x_t += z_hat # could contain positive or negative values
             z_mul = x_t * x_0 # moidfied channel noise st. it will fool the discriminator
             
-        return z_hat, to_bin(z_mul)
+        return z_hat, to_bin(z_mul), x_t
 
     def get_sigma(self, t):
         return self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) 
