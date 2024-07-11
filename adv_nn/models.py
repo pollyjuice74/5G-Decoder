@@ -159,20 +159,6 @@ class Generator( TransformerDiffusion ):
         c_t =  c_t + (l * sigma * noise)
         return c_t, z_G
 
-    def train(self, x_0, sim_ampl=True):
-        t, h, z, noise_factor
-        
-        x_t = x_0 * h + (z*noise_factor) # add random channel noise
-        sum_syn = tf.math.reduce_sum( (x_t @ self.pcm) % 2 ) # sum syndrome
-        
-        z_hat = self.tran_call(x_t, sum_syn) # noise to modify channel noise
-        x_t += z_hat # could contain positive or negative values
-        
-        z_mul = x_t * x_0
-        return to_bin(z_mul) # moidfied channel noise st. it will fool the discriminator
-        
-
-        
 
    
 
