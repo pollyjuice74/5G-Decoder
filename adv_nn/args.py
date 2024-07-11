@@ -53,5 +53,27 @@ class Args():
         code.mask = self.create_mask(H)
         return code
         
-    def create_mask():
+    def create_mask(H, n_ring=1):
         
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
