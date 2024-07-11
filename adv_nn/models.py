@@ -22,6 +22,7 @@ from DDECC.src.codes import Get_Generator_and_Parity
 class TransformerDiffusion( Layer ):
     def __init__(self, args):
         super().__init__()
+        self.model_type = args.model_type
         code = args.code
         self.n_steps = args.n_steps
         
@@ -52,8 +53,7 @@ class TransformerDiffusion( Layer ):
         return z_hat 
         
     # optimal lambda l for theoretical and for error prediction
-    def line_search(self, sigma, err_hat, model_type='dis'):
-        assert model_type in ['dis','gen'], "Invalid model type."
+    def line_search(self, sigma, err_hat):
         l_values = tf.linespace(1., 20., 20).reshape(1,1,20)
         syndromes = to_bin(r_t - l_values*(sigma*err_hat)) @ self.pcm
         
@@ -64,30 +64,28 @@ class TransformerDiffusion( Layer ):
             
         return l_values[ix]
 
-    def train(self, x_0, sim_ampl=True, model_type='dis'):
-        assert model_type in ['dis','gen'], "Invalid model type."
-        
-        t = tf.keras.random.randint( (x_0.shape[0] // 2 + 1,), minval=0,maxval=self.n_steps )
-        t = tf.concat([t, self.n_steps - t - 1], axis=0)[:x_0.shape[0]] # reshapes t to size x_0
+    def train(self, c_0, struct_noise=0, sim_ampl=True):
+        t = tf.keras.random.randint( (c_0.shape[0] // 2 + 1,), minval=0,maxval=self.n_steps )
+        t = tf.concat([t, self.n_steps - t - 1], axis=0)[:c_0.shape[0]] # reshapes t to size x_0
         t = tf.cast(t, dtype=tf.int32)
         
         noise_factor = tf.math.sqrt(self.betas_bar[t])
-        z = tf.random.normal( (x_0.shape) )
-        h = tf.random.rayleigh( (x_0.shape) ) if sim_ampl else 1.
+        z = tf.random.normal( (c_0.shape) )
+        h = tf.random.rayleigh( (c_0.shape) ) if sim_ampl else 1.
         
-        x_t = h * x_0 + (z*noise_factor) # added noise to codeword
-        sum_syn = tf.math.reduce_sum( (x_t @ self.pcm) % 2 ) # sum syndrome
+        c_t = h * c_0 + struct_noise + (z*noise_factor) # added noise to codeword
+        sum_syn = tf.math.reduce_sum( (c_t @ self.pcm) % 2 ) # sum syndrome
         
-        z_hat = self.tran_call(x_t, sum_syn) # model prediction
+        z_hat = self.tran_call(c_t, sum_syn) # model prediction
         
-        if model_type=='dis':
-            z_mul = x_t * x_0 # actual noise added through the channel
+        if self.model_type=='dis':
+            z_mul = c_t * c_0 # actual noise added through the channel
             
-        elif model_type=='gen':
-            x_t += z_hat # could contain positive or negative values
-            z_mul = x_t * x_0 # moidfied channel noise st. it will fool the discriminator
+        elif self.model_type=='gen':
+            c_t += z_hat # could contain positive or negative values
+            z_mul = c_t * c_0 # moidfied channel noise st. it will fool the discriminator
             
-        return z_hat, to_bin(z_mul), x_t
+        return z_hat, to_bin(z_mul), c_t
 
     def get_sigma(self, t):
         return self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) 
@@ -140,12 +138,14 @@ class Generator( TransformerDiffusion ):
     # 'test' function
     def call(self, c_0, z):
         c_t = c_0
-        c_t, z_G = self.fwd_diff_call(c_t, z)   
+        
+        for i in range(self.pcm.shape[0]):
+            c_t, z_G = self.fwd_diff_call(c_t)   
            
         assert z_G==(c_t-c_0), "Cumulative z_G should be the same as c_t-c_0" 
         return z_G
 
-    def fwd_diff_call(self, c_t, z_G):
+    def fwd_diff_call(self, c_t):
         t = ( self.pcm @ to_bin(r_t) ).sum()
         z_G = self.tran_call(c_t, t)
         
