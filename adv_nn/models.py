@@ -103,7 +103,8 @@ class TransformerDiffusion( Layer ):
 class Discriminator( TransformerDiffusion ):
     def __init__(self):
         super().__init__()
-       
+
+    # 'test' function
     def call(self, r_t):
        for i in range(self.pcm.shape[0]):
            r_t, z_hat, t = self.rev_diff_call(r_t)
@@ -140,6 +141,7 @@ class Generator( TransformerDiffusion ):
     def __init__(self):
         super().__init__()
 
+    # 'test' function
     def call(self, c_0):
         c_t = c_0
         for i in range(self.pcm.shape[0]):
