@@ -36,19 +36,6 @@ class TransformerDiffusion( Layer ):
         self.to_n = Dense(code.n + code.m) 
         self.time_embed = Embedding(args.beta_steps, args.d_model)
 
-    # optimal lambda l for theoretical and for error prediction
-    def line_search(self, sigma, err_hat, model_type='dis'):
-        assert model_type in ['dis','gen'], "Invalid model type."
-        l_values = tf.linespace(1., 20., 20).reshape(1,1,20)
-        syndromes = to_bin(r_t - l_values*(sigma*err_hat)) @ self.pcm
-        
-        if model_type=='dis': 
-             ix = syndromes.argmin() 
-        else: 
-             ix = syndromes.argmax() 
-            
-        return l_values[ix]
-
     # Extracts noise estimate z_hat from r
     def tran_call(self, r_t, t):
         syndrome = self.pcm @ to_bin(r_t) #(m,1) check nodes
@@ -63,7 +50,47 @@ class TransformerDiffusion( Layer ):
         emb_t = self.decoder(emb_t, self.mask, time_emb)
         z_hat = self.fc(emb_t)
         return z_hat 
+        
+    # optimal lambda l for theoretical and for error prediction
+    def line_search(self, sigma, err_hat, model_type='dis'):
+        assert model_type in ['dis','gen'], "Invalid model type."
+        l_values = tf.linespace(1., 20., 20).reshape(1,1,20)
+        syndromes = to_bin(r_t - l_values*(sigma*err_hat)) @ self.pcm
+        
+        if model_type=='dis': 
+             ix = syndromes.argmin() 
+        else: 
+             ix = syndromes.argmax() 
+            
+        return l_values[ix]
 
+    def train(self, x_0, sim_ampl=True, model_type='dis'):
+        assert model_type in ['dis','gen'], "Invalid model type."
+        
+        t = tf.keras.random.randint( (x_0.shape[0] // 2 + 1,), minval=0,maxval=self.n_steps )
+        t = tf.concat([t, self.n_steps - t - 1], axis=0)[:x_0.shape[0]] # reshapes t to size x_0
+        t = tf.cast(t, dtype=tf.int32)
+        
+        z = tf.random.normal( (x_0.shape) )
+        noise_factor = tf.math.sqrt(self.betas_bar[t])
+        h = tf.random.rayleigh( (x_0.shape) ) if sim_ampl else 1.
+        
+        x_t = h * x_0 + (z*noise_factor)
+        sum_syn = tf.math.reduce_sum( (x_t @ self.pcm) % 2 ) # sum syndrome
+        
+        z_hat = self.tran_call(x_t, sum_syn)
+        
+        if model_type=='dis':
+            z_mul = x_t * x_0
+            
+        elif model_type=='gen':
+            x_t += z_hat # could contain positive or negative values
+            z_mul = x_t * x_0 # moidfied channel noise st. it will fool the discriminator
+            
+        return z_hat, to_bin(z_mul)
+
+    def get_sigma(self, t):
+        return self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) 
 
 # Construct discriminator (decoder using reverse diffusion)
     # Will have to come up with ways to try to decode the noised codeword against specific noise
@@ -98,24 +125,8 @@ class Discriminator( TransformerDiffusion ):
         # r_t1[t==0] = r_t[t==0] # if cw has 0 synd. keep as is
         return r_t1, z_hat, t # r at time t-1
 
-    def train(self, x_0, sim_ampl=True):
-        t = tf.keras.random.randint( (x_0.shape[0] // 2 + 1,), minval=0,maxval=self.n_steps )
-        t = tf.concat([t, self.n_steps - t - 1], axis=0)[:x_0.shape[0]] # reshapes t to size x_0
-        t = tf.cast(t, dtype=tf.int32)
-        
-        z = tf.random.normal( (x_0.shape), stddev=self.get_sigma(t) )
-        noise_factor = tf.math.sqrt(self.betas_bar[t])
-        h = tf.random.rayleigh( (x_0.shape) ) if sim_ampl else 1.
-        
-        x_t = h * x_0 + (z*noise_factor)
-        
-        sum_syn = tf.math.reduce_sum( (x_t @ self.pcm) % 2 ) # sum syndrome
-        z_hat = self.tran_call(x_t, sum_syn)
-        z_mul = x_t * x_0
-        return z_hat, to_bin(z_mul)
 
-    def get_sigma(self, t):
-        return ( self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) )
+
         
 
 # Construct generator (encoder using forward diffusion to simulate channel)
@@ -141,12 +152,24 @@ class Generator( TransformerDiffusion ):
         t = ( self.pcm @ to_bin(r_t) ).sum()
         z_G = self.tran_call(c_t, t)
         
-        sigma = ( self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) )
+        sigma = self.get_sigma(t)
         noise = c_t - tf.sign(c_t*z_G)
         l = self.line_search(sigma, noise, model_type='gen') if self.ls_active else 1.
         
         c_t =  c_t + (l * sigma * noise)
         return c_t, z_G
+
+    def train(self, x_0, sim_ampl=True):
+        t, h, z, noise_factor
+        
+        x_t = x_0 * h + (z*noise_factor) # add random channel noise
+        sum_syn = tf.math.reduce_sum( (x_t @ self.pcm) % 2 ) # sum syndrome
+        
+        z_hat = self.tran_call(x_t, sum_syn) # noise to modify channel noise
+        x_t += z_hat # could contain positive or negative values
+        
+        z_mul = x_t * x_0
+        return to_bin(z_mul) # moidfied channel noise st. it will fool the discriminator
         
 
         
