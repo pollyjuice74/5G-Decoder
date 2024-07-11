@@ -98,14 +98,14 @@ class Discriminator( TransformerDiffusion ):
         # r_t1[t==0] = r_t[t==0] # if cw has 0 synd. keep as is
         return r_t1, z_hat, t # r at time t-1
 
-    def train(self, x_0):
+    def train(self, x_0, sim_ampl=True):
         t = tf.keras.random.randint( (x_0.shape[0] // 2 + 1,), minval=0,maxval=self.n_steps )
         t = tf.concat([t, self.n_steps - t - 1], axis=0)[:x_0.shape[0]] # reshapes t to size x_0
         t = tf.cast(t, dtype=tf.int32)
         
         z = tf.random.normal( (x_0.shape), stddev=self.get_sigma(t) )
         noise_factor = tf.math.sqrt(self.betas_bar[t])
-        h = tf.random.rayleigh( (x_0.shape) )
+        h = tf.random.rayleigh( (x_0.shape) ) if sim_ampl else 1.
         
         x_t = h * x_0 + (z*noise_factor)
         
