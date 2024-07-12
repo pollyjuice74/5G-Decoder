@@ -30,7 +30,7 @@ class TransformerDiffusion( Layer ):
         
         self.mask = self.create_mask(code.H, args.n_rings)
         self.src_embed = tf.Variable( tf.random.uniform([code.n + code.m, args.d_model]), trainable=True )
-        self.decoder = Transformer(args.mask, args.t_layers)
+        self.decoder = Transformer(self.mask, args.t_layers)
         self.fc = tf.keras.Sequential([ Dense(1) ])
         self.to_n = Dense(code.n + code.m) 
         self.time_embed = Embedding(args.beta_steps, args.d_model)
@@ -105,11 +105,15 @@ class TransformerDiffusion( Layer ):
         return src_mask
 
     def _extend_connectivity(self, mask, H=None, init_H=False, m=None, n=None):
-        m,n = H.shape if init_H else m,n
-        length = m if init_H else n + m
-        print(f"H:{H.shape}, mask: {mask.shape}")
+        if init_H:
+            m, n = H.shape
+        else:
+            m, n = int(m), int(n)  # Ensure m and n are integers
 
-        for i in range(length):
+        loop_len = int(m) if init_H else int(n + m)
+        print(f"H: {H}, mask: {mask}")
+
+        for i in range(loop_len):
             print(i)
             indices = tf.where(H[i] > 0) if init_H else tf.where(mask[i] > 0)
             for j in indices:
@@ -128,8 +132,8 @@ class TransformerDiffusion( Layer ):
         # use split diffusion to improve accuracy and efficiency by guiding model rather than EMA
 
 class Decoder( TransformerDiffusion ):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, args):
+        super().__init__(args)
 
     # 'test' function
     def call(self, r_t):
