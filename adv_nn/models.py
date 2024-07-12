@@ -28,7 +28,7 @@ class TransformerDiffusion( Layer ):
         self.betas_bar = tf.math.cumsum(self.betas, 0)
         self.ls_active = args.ls_active
         
-        self.mask = args.mask
+        self.mask = self.create_mask(H, self.n_rings)
         self.src_embed = tf.Variable( tf.random.uniform([code.n + code.m, args.d_model]), trainable=True )
         self.decoder = Transformer(args.mask, args.t_layers)
         self.fc = tf.keras.Sequential([ Dense(1) ])
@@ -99,13 +99,14 @@ class TransformerDiffusion( Layer ):
                 mask = self._extend_connectivity(mask, H, init_H=init_H) 
                 init_H = False
             else: 
-                mask = self._extend_connectivity(mask, init_H=init_H)
+                mask = self._extend_connectivity(mask, init_H=init_H, m=m,n=n)
 
         src_mask = tf.math.logical_not(tf.cast(mask > 0, dtype=tf.bool)) # not(mask > 0)
         return src_mask
 
-    def _extend_connectivity(self, mask, H=None, init_H=False):
-        length = self.m if init_H else self.n + self.m
+    def _extend_connectivity(self, mask, H=None, init_H=False, *kwargs):
+        m,n = H.shape if init_H else *kwargs
+        length = m if init_H else n + m
         print(f"H:{H.shape}, mask: {mask.shape}")
 
         for i in range(length):
