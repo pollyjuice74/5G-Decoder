@@ -88,6 +88,36 @@ class TransformerDiffusion( Layer ):
     def get_sigma(self, t):
         return self.betas_bar[t]*self.beta[t] / (self.betas_bar[t] + self.beta[t]) 
 
+    def create_mask(self, H, n_rings=1):
+        m,n = H.shape
+        mask = tf.eye(n+m, dtype=tf.float32)
+        init_H = True
+
+        for _ in range(n_rings):
+            mask = tf.identity(mask)
+            if init_H:
+                mask = self._extend_connectivity(mask, H, init_H=init_H) 
+                init_H = False
+            else: 
+                mask = self._extend_connectivity(mask, init_H=init_H)
+
+        src_mask = tf.math.logical_not(tf.cast(mask > 0, dtype=tf.bool)) # not(mask > 0)
+        return src_mask
+
+    def _extend_connectivity(self, mask, H=None, init_H=False):
+        length = self.m if init_H else self.n + self.m
+        print(f"H:{H.shape}, mask: {mask.shape}")
+
+        for i in range(length):
+            print(i)
+            indices = tf.where(H[i] > 0) if init_H else tf.where(mask[i] > 0)
+            for j in indices:
+                j = j[0]
+                ixs = [ [j,n+i],[n+i,j] ] if init_H else [ [i,j],[j,i] ] 
+                mask = tf.tensor_scatter_nd_update(mask, ixs, [1.0, 1.0])
+                
+        return mask
+
 # Construct discriminator (decoder using reverse diffusion)
     # Will have to come up with ways to try to decode the noised codeword against specific noise
     # that will be trying to fool it. 
