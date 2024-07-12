@@ -104,8 +104,8 @@ class TransformerDiffusion( Layer ):
         src_mask = tf.math.logical_not(tf.cast(mask > 0, dtype=tf.bool)) # not(mask > 0)
         return src_mask
 
-    def _extend_connectivity(self, mask, H=None, init_H=False, *kwargs):
-        m,n = H.shape if init_H else *kwargs
+    def _extend_connectivity(self, mask, H=None, init_H=False, m=None, n=None):
+        m,n = H.shape if init_H else m,n
         length = m if init_H else n + m
         print(f"H:{H.shape}, mask: {mask.shape}")
 
