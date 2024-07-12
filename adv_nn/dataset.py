@@ -4,13 +4,16 @@ import random
 
 class FEC_Dataset(tf.data.Dataset):
     def __new__(cls, code, sigma=0.1, length=250, zero_cw=True, ones_m=False, flip_cw=False):
-        k, n = code.k, code.n
-        specs = [ tf.TensorSpec(shape=(k if i==0 else \
-                                       n-k if i==7 else \
-                                       n for i in range(8))) ]
+        m, n = code.H.shape
+        k = n-m
+        specs = tuple( tf.TensorSpec(shape=(k,), dtype=tf.float32) if i == 0 else
+                       tf.TensorSpec(shape=(m,), dtype=tf.float32) if i == 7 else
+                       tf.TensorSpec(shape=(n,), dtype=tf.float32) 
+                       for i in range(8) )
+        
         return tf.data.Dataset.from_generator(
             cls._generator,
-            output_signature=tuple(specs),
+            output_signature=specs,
             args=(code.G, code.H, k, n, sigma, length, zero_cw, ones_m, flip_cw)
         )
   
@@ -36,11 +39,11 @@ class FEC_Dataset(tf.data.Dataset):
 
             # Make noise
             std_noise = random.choice(sigma)
-            z = tf.random.normal((args.code.n,), std_noise)
-            h = tf.random.rayleigh((args.code.n,), std_noise) if sim_ampl else 1.  # simulates signal amplitude of multipath propagation signals
+            z = tf.random.normal((n,), std_noise)
+            h = np.random.rayleigh(std_noise, (n,)) if sim_ampl else 1.  # simulates signal amplitude of multipath propagation signals
             
             # Convert y to sign and add noise
-            y = h*bin_to_sign(x) + z
+            y = bin_to_sign(x) * h + z
 
             x = bin_to_sign(x)
             var = std_noise ** 2
@@ -48,9 +51,10 @@ class FEC_Dataset(tf.data.Dataset):
             x_llr = sign_to_llr(x, var)
             y_llr = sign_to_llr(y, var)
 
+            y_reshaped = tf.reshape(y, [-1, 1])
+            syndrome = ( H @ tf.cast(sign_to_bin(tf.sign(y_reshaped)), tf.int64) ) % 2
+            syndrome = tf.squeeze( bin_to_sign(syndrome) )
             magnitude = tf.abs(y)
-            syndrome = ( tf.cast(sign_to_bin(tf.sign(y)), tf.int64) @ H ) % 2
-            syndrome = bin_to_sign(syndrome)
 
             yield cast_to_float32(m, x, z, y, x_llr, y_llr, magnitude, syndrome)
 
