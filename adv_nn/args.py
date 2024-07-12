@@ -11,11 +11,14 @@ class Args():
         
         self.model_type = model_type
         self.code_type = code_type
+                           
         self.n_rings = n_rings # ring connectivity of mask
         self.sigma = sigma
         self.beta_steps = beta_steps
         self.t_layers = t_layers
         self.d_model = d_model
+        self.ls_active = ls_active
+                           
         self.lr = lr
         self.batch_size = batch_size
         self.traindata_len = traindata_len
