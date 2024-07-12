@@ -50,8 +50,5 @@ class Args():
             G, H = Get_Generator_and_Parity(code)
             code.G, code.H = tf.convert_to_tensor(G), tf.convert_to_tensor(H)
         
-        code.mask = self.create_mask(H, self.n_rings)
         return code
         
-
-
