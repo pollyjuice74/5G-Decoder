@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Layer, Embedding, Dense
 import numpy as np
+import random
 
 from decoder import * 
 
