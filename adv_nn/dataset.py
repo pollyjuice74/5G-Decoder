@@ -2,21 +2,7 @@ import tensorflow as tf
 import random
 
 
-class FEC_Dataset(tf.data.Dataset):
-    def __new__(cls, code, sigma=0.1, length=250, zero_cw=True, ones_m=False, flip_cw=False):
-        m, n = code.H.shape
-        k = n-m
-        specs = tuple( tf.TensorSpec(shape=(k,), dtype=tf.float32) if i == 0 else
-                       tf.TensorSpec(shape=(m,), dtype=tf.float32) if i == 7 else
-                       tf.TensorSpec(shape=(n,), dtype=tf.float32) 
-                       for i in range(8) )
-        
-        return tf.data.Dataset.from_generator(
-            cls._generator,
-            output_signature=specs,
-            args=(code.G, code.H, k, n, sigma, length, zero_cw, ones_m, flip_cw)
-        )
-  
+class FEC_Dataset(tf.data.Dataset): 
     @staticmethod
     def _generator(G,H, k,n, sigma, length, zero_cw, ones_m, flip_cw, sim_ampl=True):
         for _ in range(length):
@@ -57,6 +43,18 @@ class FEC_Dataset(tf.data.Dataset):
             magnitude = tf.abs(y)
 
             yield cast_to_float32(m, x, z, y, x_llr, y_llr, magnitude, syndrome)
+            
+    def __new__(cls, code, sigma=0.1, length=250, zero_cw=True, ones_m=False, flip_cw=False):
+        m, n = code.H.shape
+        k = n-m
+        specs = tuple( tf.TensorSpec(shape=(k,), dtype=tf.float32) if i == 0 else
+                       tf.TensorSpec(shape=(m,), dtype=tf.float32) if i == 7 else
+                       tf.TensorSpec(shape=(n,), dtype=tf.float32) 
+                       for i in range(8) )
+        
+        return tf.data.Dataset.from_generator( cls._generator,
+                                               output_signature=specs,
+                                               args=(code.G, code.H, k, n, sigma, length, zero_cw, ones_m, flip_cw) )
 
 @staticmethod
 def cast_to_float32(*args):
