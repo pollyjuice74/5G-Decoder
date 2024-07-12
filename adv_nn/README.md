@@ -1,6 +1,6 @@
 # Adversarial Neural Network Implementation
 
-Contains implementation a **tensorflow** implementation for scalability of a `Discriminator` and a `Generator` where the discriminator decodes a recieved codeword `r`
+Contains a **tensorflow** implementation for scalability of a `Discriminator` and a `Generator` where the discriminator decodes a recieved codeword `r`
 and generator adds noise `z_G` to a codeword `c` such that it will increase the discriminator's `BER` performance 
 on a given `EbN0` signal to noise ratio. 
 
