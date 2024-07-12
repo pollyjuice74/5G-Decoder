@@ -111,10 +111,8 @@ class TransformerDiffusion( Layer ):
             m, n = int(m), int(n)  # Ensure m and n are integers
 
         loop_len = int(m) if init_H else int(n + m)
-        print(f"H: {H}, mask: {mask}")
 
         for i in range(loop_len):
-            print(i)
             indices = tf.where(H[i] > 0) if init_H else tf.where(mask[i] > 0)
             for j in indices:
                 j = j[0]
