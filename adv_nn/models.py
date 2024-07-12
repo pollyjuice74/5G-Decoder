@@ -28,7 +28,7 @@ class TransformerDiffusion( Layer ):
         self.betas_bar = tf.math.cumsum(self.betas, 0)
         self.ls_active = args.ls_active
         
-        self.mask = self.create_mask(H, self.n_rings)
+        self.mask = self.create_mask(code.H, args.n_rings)
         self.src_embed = tf.Variable( tf.random.uniform([code.n + code.m, args.d_model]), trainable=True )
         self.decoder = Transformer(args.mask, args.t_layers)
         self.fc = tf.keras.Sequential([ Dense(1) ])
