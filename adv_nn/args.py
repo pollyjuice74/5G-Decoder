@@ -12,22 +12,22 @@ class Args():
         self.model_type = model_type
         self.code_type = code_type
         self.n_rings = n_rings # ring connectivity of mask
-        self.code = self.get_code(n,k)
-        self.m, self.n = self.code.H.shape
-        self.k = self.n - self.m
-        
-        self.ls_active = True
         self.sigma = sigma
         self.beta_steps = beta_steps
-        self.t_layers = t_layers # transformer layers
+        self.t_layers = t_layers
         self.d_model = d_model
-        self.n_steps = self.code.H.shape[0]+5 # Number of diffusion steps
-        self.epochs = epochs #
-        self.batch_size = batch_size # chunks 
+        self.lr = lr
+        self.batch_size = batch_size
         self.traindata_len = traindata_len
         self.testdata_len = testdata_len
+        self.epochs = epochs
 
-        self.lr = lr
+        # Ensure that code, m, and n are set properly
+        self.code = self.get_code(n, k)
+        self.m = self.code.H.shape[0]
+        self.n = self.code.H.shape[1]
+        self.k = self.n - self.m
+        self.n_steps = self.m + 5  # Number of diffusion steps
 
     def get_code(self, n, k):
         code = type('Code', (), {})() # class Code, no base class, no attributes/methods, () instantiate object
@@ -53,56 +53,5 @@ class Args():
         code.mask = self.create_mask(H, self.n_rings)
         return code
         
-    def create_mask(self, H, n_rings=1):
-        m,n = H.shape
-        mask = tf.eye(n+m, dtype=tf.float32)
-        init_H = True
-
-        for _ in range(n_rings):
-            mask = tf.identity(mask)
-            if init_H:
-                mask = self._extend_connectivity(mask, H, init_H=init_H) 
-                init_H = False
-            else: 
-                mask = self._extend_connectivity(mask, init_H=init_H)
-
-        src_mask = tf.math.logical_not(tf.cast(mask > 0, dtype=tf.bool)) # not(mask > 0)
-        return src_mask
-
-    def _extend_connectivity(self, mask, H=None, init_H=False):
-        len = self.m if init_H else self.n + self.m
-        print(f"H:{H.shape}, mask: {mask.shape}")
-
-        for i in range(len):
-            print(i)
-            indices = tf.where(H[i] > 0) if init_H else tf.where(mask[i] > 0)
-            for j in indices:
-                j = j[0]
-                ixs = [ [j,n+i],[n+i,j] ] if init_H else [ [i,j],[j,i] ] 
-                mask = tf.tensor_scatter_nd_update(mask, ixs, [1.0, 1.0])
-                
-        return mask
-        
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
