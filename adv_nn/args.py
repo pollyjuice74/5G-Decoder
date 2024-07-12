@@ -11,10 +11,10 @@ class Args():
         
         self.model_type = model_type
         self.code_type = code_type
-        self.k, self.n = k, n
-        self.m = n - k
         self.n_rings = n_rings # ring connectivity of mask
         self.code = self.get_code(n,k)
+        self.m, self.n = self.code.H.shape
+        self.k = self.n - self.m
         
         self.ls_active = True
         self.sigma = sigma
@@ -70,8 +70,11 @@ class Args():
         return src_mask
 
     def _extend_connectivity(self, mask, H=None, init_H=False):
-        m,n = H.shape
-        for i in range(n+m):
+        len = self.m if init_H else self.n + self.m
+        print(f"H:{H.shape}, mask: {mask.shape}")
+
+        for i in range(len):
+            print(i)
             indices = tf.where(H[i] > 0) if init_H else tf.where(mask[i] > 0)
             for j in indices:
                 j = j[0]
@@ -79,7 +82,6 @@ class Args():
                 mask = tf.tensor_scatter_nd_update(mask, ixs, [1.0, 1.0])
                 
         return mask
-                
         
         
 
