@@ -8,21 +8,21 @@ from attention import *
 class Transformer(Layer):
     def __init__(self, mask, N):
         super().__init__()
-        self.transformer_layers = [ TransformerLayer(MHAttention, FeedForward, PreNorm, mask) for _ in range(N) ]
+        self.transformer_layers = [ TransformerLayer(MHAttention, FeedForward, PreNorm) for _ in range(N) ]
+        self.mask = mask
 
     def call(self, x):
         for transformer in self.transformer_layers:
-            x = transformer(x, mask)
+            x = transformer(x, self.mask)
         return x
 
 
 class TransformerLayer(Layer):
-    def __init__(self, attn, ff, norm, mask):
+    def __init__(self, attn, ff, norm):
         super().__init__()
         self.attn, self.ff = attn, ff
         self.norm1, self.norm2 = c(norm), c(norm)
-        self.mask = mask
 
-    def call(self, x):
-        out = self.norm1( self.attn(x, self.mask) )
+    def call(self, x, mask):
+        out = self.norm1( self.attn(x, mask) )
         return self.norm2( self.ff(out) )
