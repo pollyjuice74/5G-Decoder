@@ -26,6 +26,7 @@ class Args():
 
         # Ensure that code, m, and n are set properly
         self.code = self.get_code(n_look_up, k_look_up) # n,k look up values in Get_Generator_and_Parity
+        self.n, self.m, self.k = code.n, code.m, code.k
         self.n_steps = self.code.m + 5  # Number of diffusion steps
 
     def get_code(self, n_look_up, k_look_up):
