@@ -14,7 +14,6 @@ class Args():
                            
         self.n_rings = n_rings # ring connectivity of mask
         self.sigma = sigma
-        self.beta_steps = beta_steps
         self.t_layers = t_layers
         self.d_model = d_model
         self.ls_active = ls_active
