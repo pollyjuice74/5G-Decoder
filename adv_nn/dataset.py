@@ -7,7 +7,7 @@ class FEC_Dataset(tf.data.Dataset):
     @staticmethod
     def _generator(G,H, k,n, sigma, length, zero_cw, ones_m, flip_cw, sim_ampl=True):
         for _ in range(length):
-            # raise print("Zero cw and all ones m are not compatible at the same time")
+            # Random bits
             if zero_cw is None and not ones_m:
                 m = tf.squeeze(tf.random.uniform((1,k), minval=0, maxval=2, dtype=tf.int32))
                 x = (m @ G) % 2
