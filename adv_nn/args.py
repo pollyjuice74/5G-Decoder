@@ -4,7 +4,7 @@ from DDECC.src.codes import Get_Generator_and_Parity
 
 class Args():
     def __init__(self, model_type, code_type='LDPC', n=121, k=80, n_rings=2, ls_active=True, sigma=0.1,
-                       beta_steps=10, t_layers=1, d_model=8, lr=5e-4, batch_size=128, 
+                       t_layers=1, d_model=8, lr=5e-4, batch_size=128, 
                        traindata_len=500, testdata_len=250, epochs=1000):
         assert model_type in ['gen', 'dis'], "Type must be: 'gen', Generator or 'dis', Discriminator."
         assert code_type in ['POLAR', 'BCH', 'CCSDS', 'LDPC', 'MACKAY', 'LDPC5G', 'POLAR5G'], "Invalid linear code type."
