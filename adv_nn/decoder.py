@@ -8,7 +8,7 @@ from attention import *
 class Transformer(Layer):
     def __init__(self, mask, N):
         super().__init__()
-        self.transformer_layers = [ TransformerLayer(MHAttention, FeedForward, PreNorm) for _ in range(N) ]
+        self.transformer_layers = [ TransformerLayer( MHAttention(args.d_model, args.heads), FeedForward(args.d_model), PreNorm() ) for _ in range(N) ]
         self.mask = mask
 
     def call(self, x):
