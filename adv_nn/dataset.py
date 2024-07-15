@@ -12,8 +12,8 @@ class FEC_Dataset(tf.data.Dataset):
                 m = tf.squeeze(tf.random.uniform((1,k), minval=0, maxval=2, dtype=tf.int32))
                 x = (m @ G) % 2
             else: # SET TO TRUE
-                m = tf.zeros((1,k), dtype=tf.int64)
-                x = tf.zeros((1,n), dtype=tf.int64)
+                m = tf.zeros((k,), dtype=tf.int64)
+                x = tf.zeros((n,), dtype=tf.int64)
 
             # make all 1s message
             if ones_m:
