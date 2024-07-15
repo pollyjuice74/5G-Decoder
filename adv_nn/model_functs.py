@@ -11,21 +11,22 @@ def test_gen():
     pass
 
 
-def train_dec(model, train_loader, optimizer, epoch, LR):
+def train_dec(model, train_loader, optimizer, epoch, LR, traindata_len):
     loss_fn = tf.keras.losses.BinaryCrossentropy()
     t = time.time()
-    
-    for batch_idx, (_, x, _, _, _, _) in enumerate(train_loader):
+
+    print(train_loader)
+    for batch_idx, (_, x, _, _, _, _, _, _) in enumerate(train_loader):
         with tf.GradientTape() as tape:
-            z_hat, z_mul = model.train(x)
+            z_hat, z_mul, c_t = model.train(x)
             loss = loss_fn(z_hat, z_mul)
-            
+
         gradients = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
-        if (batch_idx + 1) % 10 == 0 or batch_idx == len(train_loader) - 1:
-            print(f'Training epoch {epoch}, Batch {batch_idx + 1}/{len(train_loader)}: LR={LR:.2e}, Loss={loss.numpy():.5e}')
-            
+        if (batch_idx + 1) % 10 == 0 or batch_idx == traindata_len - 1:
+            print(f'Training epoch {epoch}, Batch {batch_idx + 1}/{traindata_len}: LR={LR:.2e}, Loss={loss.numpy():.5e}')
+
     print(f'Epoch {epoch} Train Time {time.time() - t}s\n')
             
 
