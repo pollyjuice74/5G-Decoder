@@ -1,6 +1,7 @@
 # sionna source code, sionna.utils.metrics
 from metrics import compute_bler as BLER
 from metrics import BitErrorRate as BER
+import tensorflow as tf
 
 
 def train_gen():
