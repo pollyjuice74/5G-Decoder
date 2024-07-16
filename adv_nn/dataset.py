@@ -10,19 +10,19 @@ class FEC_Dataset(tf.data.Dataset):
             # Random bits
             if zero_cw is None and not ones_m:
                 m = tf.squeeze(tf.random.uniform((1,k), minval=0, maxval=2, dtype=tf.int32))
-                x = (m @ G) % 2
+                c = (m @ G) % 2
             else: # SET TO TRUE
                 m = tf.zeros((k,), dtype=tf.int64)
-                x = tf.zeros((n,), dtype=tf.int64)
+                c = tf.zeros((n,), dtype=tf.int64)
 
             # make all 1s message
             if ones_m:
                 m = tf.squeeze(tf.ones((1,k), dtype=tf.int64))
-                x = (m @ G) % 2
+                c = (m @ G) % 2
 
             # flip binary cw
             if flip_cw:
-                x = 1 - x
+                c = 1 - c
 
             # Make noise
             std_noise = random.choice(sigma)
@@ -30,12 +30,12 @@ class FEC_Dataset(tf.data.Dataset):
             h = np.random.rayleigh(std_noise, (n,)) if sim_ampl else 1.  # simulates signal amplitude of multipath propagation signals
             
             # Convert y to sign and add noise
-            y = bin_to_sign(x) * h + z
+            y = bin_to_sign(c) * h + z
 
-            x = bin_to_sign(x)
+            c = bin_to_sign(c)
             var = std_noise ** 2
             # x,y to llrs
-            x_llr = sign_to_llr(x, var)
+            c_llr = sign_to_llr(c, var)
             y_llr = sign_to_llr(y, var)
 
             y_reshaped = tf.reshape(y, [-1, 1])
@@ -43,7 +43,7 @@ class FEC_Dataset(tf.data.Dataset):
             syndrome = tf.squeeze( bin_to_sign(syndrome) )
             magnitude = tf.abs(y)
 
-            yield cast_to_float32(m, x, z, y, x_llr, y_llr, magnitude, syndrome)
+            yield cast_to_float32(m, sign_to_bin(c), z, y, c_llr, y_llr, magnitude, syndrome)
             
     def __new__(cls, code, sigma=0.1, length=250, zero_cw=True, ones_m=False, flip_cw=False):
         m, n = code.H.shape
@@ -63,12 +63,12 @@ def cast_to_float32(*args):
 
 @staticmethod
 def sign_to_llr(bpsk_vect, noise_variance):
-    return 2 * bpsk_vect / noise_variance
+    return -2 * bpsk_vect / noise_variance
 
 @staticmethod
-def bin_to_sign(x):
-    return 2 * tf.cast(x, tf.float32) - 1
+def bin_to_sign(c):
+    return 2 * tf.cast(c, tf.float32) - 1
 
 @staticmethod
-def sign_to_bin(x):
-    return (x + 1) // 2
+def sign_to_bin(c):
+    return (c + 1) // 2
