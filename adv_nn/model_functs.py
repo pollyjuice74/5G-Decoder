@@ -2,6 +2,7 @@
 from metrics import compute_bler as BLER
 from metrics import BitErrorRate as BER
 import tensorflow as tf
+import time
 
 
 def train_gen():
