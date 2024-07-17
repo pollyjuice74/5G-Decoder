@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Layer, Embedding, Dense
 import numpy as np
 
-from dataset import *
+from dataset import sign_to_bin
 from decoder import * 
 
 ## Generative Adversarial Network approach
