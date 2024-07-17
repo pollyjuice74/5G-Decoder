@@ -38,9 +38,10 @@ def test_dec(model, test_loader_list, EbNo_range_test, min_FER=100, max_cum_coun
 
     for ix, test_loader in enumerate(test_loader_list):
         for batch_ix, (m, c, z, r, _, _, magnitude, syndrome) in enumerate(test_loader):
-            c_hat = model(r)
-            ber_list.append( BER(c, c_hat) ) # BER
-            bler_list.append( BLER(c, c_hat) ) # BLER
+            c_hat, z_hat, dif_iter = model(r)
+            print(c_hat.shape)
+            ber_list.append( compute_ber(c, c_hat) ) # BER
+            bler_list.append( compute_bler(c, c_hat) ) # BLER
             print(f'Test EbN0={EbNo_range_test[ix]}, BER={ber_list[-1]}')
             print(f'Test EbN0={EbNo_range_test[ix]}, BLER={bler_list[-1]}')
 
@@ -53,14 +54,14 @@ def test_dec(model, test_loader_list, EbNo_range_test, min_FER=100, max_cum_coun
     return { "ber": ber_list, "bler": bler_list }
 
 
-def test_models(): 
+def test_models(model, test_ebnos_datasets, EbNo_range_test):
     data = { "LTDM": dict() } # only decoders
 
     for ix, tst_dataset in enumerate(test_ebnos_datasets):
         print(f"\nTesting on {list(dataset_types.keys())[ix].upper()}")
-        
+
         print("Testing  Linear Transformer Diffusion Model...")
-        data["LTDM"][ix] = test(dec, tst_dataset, EbNo_range_test, min_FER=50,max_cum_count=1e6,min_cum_count=1e4)
+        data["LTDM"][ix] = test_dec(model, tst_dataset, EbNo_range_test, min_FER=50,max_cum_count=1e6,min_cum_count=1e4)
         return data
 
 
