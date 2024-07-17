@@ -180,8 +180,11 @@ class TransformerDiffusion( Layer ):
         # use split diffusion to improve accuracy and efficiency by guiding model rather than EMA
 
 class Decoder( TransformerDiffusion ):
-    def __init__(self, args):
+    def __init__(self, args, dec5G=None):
         super().__init__(args)
+        # Use 5G NR compliant enc/dec pcm if decoder is given
+        if dec5G is not None:
+            self.pcm = dec5G.pcm
 
     # 'test' function
     def call(self, r_t):
@@ -216,6 +219,7 @@ class Decoder( TransformerDiffusion ):
         # r_t1[t==0] = r_t[t==0] # if cw has 0 synd. keep as is
 
         return r_t1, z_hat # r at t-1, both (n,1)
+        
 # Construct generator (encoder using forward diffusion to simulate channel)
     # By simulating channel it will try to come up with ways to fool discriminator/decoder
     # through noising the original codeword
