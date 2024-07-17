@@ -20,7 +20,7 @@ The `Generator` is implemented similarly.
 - `model_functs.py` train/test functions for models.
 - `channel.py` end-to-end channel between Discriminator and Generator.
   
-- `decoder.py` transformer class.
+- `decoder.py` transformer class. *** Should be transformer.py ***
 - `attention.py` low-rank projection implementation of attention with `O( (n+m)d * |edges(H_mask)| )`.
 
 - `dataset.py` dataset with dataset types: zero_cw, ones_m, flip_cw, random_bits.
