@@ -1,6 +1,4 @@
-# sionna source code, sionna.utils.metrics
-from metrics import compute_bler as BLER
-from metrics import BitErrorRate as BER
+from sionna.utils.metrics import compute_ber, compute_bler
 import tensorflow as tf
 import time
 
