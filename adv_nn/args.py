@@ -4,6 +4,8 @@ from DDECC.src.codes import Get_Generator_and_Parity
 from sionna.fec.ldpc.encoding import LDPC5GEncoder
 from .decoder5G import LDPC5GDecoder
 
+from scipy.sparse import issparse, csr_matrix
+
 
 class Args():
     def __init__(self, model_type, code_type='LDPC', n_look_up=121, k_look_up=80, n=400, k=200,
@@ -47,7 +49,7 @@ class Args():
     
         if code_type not in ['LDPC5G', 'POLAR5G']:
             G, H = Get_Generator_and_Parity(code)
-            code.G, code.H = tf.convert_to_tensor(G), tf.convert_to_tensor(H)
+            code.G, code.H = tf.convert_to_tensor(G), csr_matrix( tf.convert_to_tensor(H) )
         
             code.m, code.n = code.H.shape
             code.k = code.n - code.m
