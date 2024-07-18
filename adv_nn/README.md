@@ -11,7 +11,6 @@ decoding approaches of `O( Iters * |edges(H)| )`.
 The `Generator` is implemented similarly.
 
 ---
-
 ## Overview
 
 - `LinearTranDiff.ipynb` running Discriminator on datasets and making sure layers work properly.
