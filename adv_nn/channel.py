@@ -4,8 +4,8 @@ from tensorflow.keras.losses import BinaryCrossentropy
 from models import *
 
 # sionna source code, sionna.utils.metrics
-from metrics import compute_bler as BLER
-from metrics import BitErrorRate as BER
+from sionna.utils.metrics import compute_bler as BLER
+from sionna.utils.metrics import BitErrorRate as BER
 
 
 class GANChannel(tf.keras.Model):
