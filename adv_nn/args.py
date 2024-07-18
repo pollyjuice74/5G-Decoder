@@ -1,6 +1,9 @@
 import tensorflow as tf
 from DDECC.src.codes import Get_Generator_and_Parity
 
+from sionna.fec.ldpc.encoding import LDPC5GEncoder
+from .decoder5G import LDPC5GDecoder
+
 
 class Args():
     def __init__(self, model_type, code_type='LDPC', n_look_up=121, k_look_up=80, n_rings=2, ls_active=True, sigma=0.1,
@@ -37,12 +40,12 @@ class Args():
         code.code_type = self.code_type
     
         if self.code_type=='LDPC5G':
-            encoder = LDPC5GEncoder(k,n)
-            decoder = LDPC5GDecoder(encoder)
-            code.enc = encoder
-            code.dec = decoder # contains encoder
+            # encoder = LDPC5GEncoder(k,n)
+            # decoder = LDPC5GDecoder(encoder)
+            # code.enc = encoder
+            # code.dec = decoder # contains encoder
             
-            H = encoder.pcm
+            # H = encoder.pcm
             
         elif self.code_type=='POLAR5G':
             pass
