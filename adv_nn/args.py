@@ -35,7 +35,7 @@ class Args():
         # Ensure that code, m, and n are set properly
         self.code = self.get_code(n_look_up, k_look_up) # n,k look up values in Get_Generator_and_Parity
         
-        if code_type not in ['LDPC5G', 'POLAR5G']:
+        if self.code_type not in ['LDPC5G', 'POLAR5G']:
             self.n, self.m, self.k = self.code.n, self.code.m, self.code.k
         else: 
             self.n, self.m, self.k = n, n-k, k
@@ -47,7 +47,7 @@ class Args():
         code.n_look_up, code.k_look_up = n_look_up, k_look_up
         code.code_type = self.code_type
     
-        if code_type not in ['LDPC5G', 'POLAR5G']:
+        if self.code_type not in ['LDPC5G', 'POLAR5G']:
             G, H = Get_Generator_and_Parity(code)
             code.G, code.H = tf.convert_to_tensor(G), csr_matrix( tf.convert_to_tensor(H) )
         
