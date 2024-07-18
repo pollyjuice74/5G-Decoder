@@ -45,19 +45,7 @@ class Args():
         code.n_look_up, code.k_look_up = n_look_up, k_look_up
         code.code_type = self.code_type
     
-        if self.code_type=='LDPC5G':
-            pass
-            # encoder = LDPC5GEncoder(k,n)
-            # decoder = LDPC5GDecoder(encoder)
-            # code.enc = encoder
-            # code.dec = decoder # contains encoder
-            
-            # H = encoder.pcm
-            
-        elif self.code_type=='POLAR5G':
-            pass
-            
-        else:
+        if code_type not in ['LDPC5G', 'POLAR5G']:
             G, H = Get_Generator_and_Parity(code)
             code.G, code.H = tf.convert_to_tensor(G), tf.convert_to_tensor(H)
         
