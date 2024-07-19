@@ -19,7 +19,7 @@ from models import Decoder
 class LDPC5GDecoder(LDPCBPDecoder):
     def __init__(self,
                  encoder,
-                 decoder=None,
+                 args,
                  trainable=False,
                  cn_type='boxplus-phi',
                  hard_out=True,
@@ -35,7 +35,6 @@ class LDPC5GDecoder(LDPCBPDecoder):
         assert isinstance(encoder, LDPC5GEncoder), 'encoder must \
                           be of class LDPC5GEncoder.'
         self._encoder = encoder
-        self._decoder = decoder
         pcm = encoder.pcm
 
         assert isinstance(return_infobits, bool), 'return_info must be bool.'
@@ -85,6 +84,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
             # no pruning; same length as before
             self._n_pruned = encoder._n_ldpc
 
+        # DECODER
         super().__init__(pcm,
                          trainable,
                          cn_type,
@@ -94,6 +94,8 @@ class LDPC5GDecoder(LDPCBPDecoder):
                          stateful=stateful,
                          output_dtype=output_dtype,
                          **kwargs)
+        # args.code.H = pcm
+        # self._decoder = Decoder(args)
 
     #########################################
     # Public methods and properties
@@ -205,66 +207,68 @@ class LDPC5GDecoder(LDPCBPDecoder):
 
         llr_5g = tf.concat([x1, z, x2], 1)
 
-        ############################################################
-        # and execute the decoder
-        x_hat = self._decoder(llr_5g) #super().call(llr_5g)
-        ############################################################
+        return llr_5g
 
-        if self._return_infobits: # return only info bits
-            # reconstruct u_hat # code is systematic
-            u_hat = tf.slice(x_hat, [0,0], [batch_size, self.encoder.k])
-            # Reshape u_hat so that it matches the original input dimensions
-            output_shape = llr_ch_shape[0:-1] + [self.encoder.k]
-            # overwrite first dimension as this could be None (Keras)
-            output_shape[0] = -1
-            u_reshaped = tf.reshape(u_hat, output_shape)
+        # ############################################################
+        # # and execute the decoder
+        # print(llr_5g.shape)
+        # x_hat = self._decoder(llr_5g) #super().call(llr_5g)
+        # ############################################################
 
-            # enable other output datatypes than tf.float32
-            u_out = tf.cast(u_reshaped, self._output_dtype)
+        # if self._return_infobits: # return only info bits
+        #     # reconstruct u_hat # code is systematic
+        #     u_hat = tf.slice(x_hat, [0,0], [batch_size, self.encoder.k])
+        #     # Reshape u_hat so that it matches the original input dimensions
+        #     output_shape = llr_ch_shape[0:-1] + [self.encoder.k]
+        #     # overwrite first dimension as this could be None (Keras)
+        #     output_shape[0] = -1
+        #     u_reshaped = tf.reshape(u_hat, output_shape)
 
-            if not self._stateful:
-                return u_out
-            else:
-                return u_out, msg_vn
+        #     # enable other output datatypes than tf.float32
+        #     u_out = tf.cast(u_reshaped, self._output_dtype)
 
-        else: # return all codeword bits
-            # the transmitted CW bits are not the same as used during decoding
-            # cf. last parts of 5G encoding function
+        #     if not self._stateful:
+        #         return u_out
+        #     else:
+        #         return u_out, msg_vn
 
-            # remove last dim
-            x = tf.reshape(x_hat, [batch_size, self._n_pruned])
+        # else: # return all codeword bits
+        #     # the transmitted CW bits are not the same as used during decoding
+        #     # cf. last parts of 5G encoding function
 
-            # remove filler bits at pos (k, k_ldpc)
-            x_no_filler1 = tf.slice(x, [0, 0], [batch_size, self.encoder.k])
+        #     # remove last dim
+        #     x = tf.reshape(x_hat, [batch_size, self._n_pruned])
 
-            x_no_filler2 = tf.slice(x,
-                                    [0, self.encoder.k_ldpc],
-                                    [batch_size,
-                                    self._n_pruned-self.encoder.k_ldpc])
+        #     # remove filler bits at pos (k, k_ldpc)
+        #     x_no_filler1 = tf.slice(x, [0, 0], [batch_size, self.encoder.k])
 
-            x_no_filler = tf.concat([x_no_filler1, x_no_filler2], 1)
+        #     x_no_filler2 = tf.slice(x,
+        #                             [0, self.encoder.k_ldpc],
+        #                             [batch_size,
+        #                             self._n_pruned-self.encoder.k_ldpc])
 
-            # shorten the first 2*Z positions and end after n bits
-            x_short = tf.slice(x_no_filler,
-                               [0, 2*self.encoder.z],
-                               [batch_size, self.encoder.n])
+        #     x_no_filler = tf.concat([x_no_filler1, x_no_filler2], 1)
 
-            # if used, apply rate-matching output interleaver again as
-            # Sec. 5.4.2.2 in 38.212
-            if self._encoder.num_bits_per_symbol is not None:
-                x_short = tf.gather(x_short, self._encoder.out_int, axis=-1)
+        #     # shorten the first 2*Z positions and end after n bits
+        #     x_short = tf.slice(x_no_filler,
+        #                        [0, 2*self.encoder.z],
+        #                        [batch_size, self.encoder.n])
 
-            # Reshape x_short so that it matches the original input dimensions
-            # overwrite first dimension as this could be None (Keras)
-            llr_ch_shape[0] = -1
-            x_short= tf.reshape(x_short, llr_ch_shape)
+        #     # if used, apply rate-matching output interleaver again as
+        #     # Sec. 5.4.2.2 in 38.212
+        #     if self._encoder.num_bits_per_symbol is not None:
+        #         x_short = tf.gather(x_short, self._encoder.out_int, axis=-1)
 
-            # enable other output datatypes than tf.float32
-            x_out = tf.cast(x_short, self._output_dtype)
+        #     # Reshape x_short so that it matches the original input dimensions
+        #     # overwrite first dimension as this could be None (Keras)
+        #     llr_ch_shape[0] = -1
+        #     x_short= tf.reshape(x_short, llr_ch_shape)
 
-            if not self._stateful:
-                return x_out
-            else:
-                return x_out, msg_vn
+        #     # enable other output datatypes than tf.float32
+        #     x_out = tf.cast(x_short, self._output_dtype)
 
+        #     if not self._stateful:
+        #         return x_out
+        #     else:
+        #         return x_out, msg_vn
         
