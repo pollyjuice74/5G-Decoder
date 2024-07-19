@@ -72,3 +72,7 @@ def bin_to_sign(c):
 @staticmethod
 def sign_to_bin(c):
     return (c + 1) // 2
+
+@staticmethod
+def llr_to_bin(c):
+    return tf.cast(c < 0, tf.int32)
