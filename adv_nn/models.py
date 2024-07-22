@@ -219,6 +219,28 @@ class Decoder( TransformerDiffusion ):
         # r_t1[t==0] = r_t[t==0] # if cw has 0 synd. keep as is
 
         return r_t1, z_hat # r at t-1, both (n,1)
+
+    def split_rdiff_call(self, r_t):
+        print("Rev diff call with split diffusion...")
+        
+        # Ensure r_t is correctly shaped
+        r_t = tf.reshape(r_t, (self.n, -1))  # (n,b)
+        t = tf.reduce_sum(self.get_syndrome(llr_to_bin(r_t)), axis=0)  # (m,n)@(n,b)->(m,b)->(1,b)
+        t = tf.cast(tf.abs(t), dtype=tf.int32)
+        
+        # First half-step condition subproblem
+        z_hat_crude = self.tran_call(r_t, t)
+        r_t_half = r_t - 0.5 * self.fc(z_hat_crude * self.get_sigma(t))
+        
+        # Full-step diffusion subproblem
+        r_t1 = r_t_half + tf.random.normal(r_t_half.shape) * tf.sqrt(self.get_sigma(t))
+        
+        # Second half-step condition subproblem
+        z_hat_crude_half = self.tran_call(r_t1, t)  # Reuse the second `tran_call`
+        r_t1 = r_t1 - 0.5 * self.fc(z_hat_crude_half * self.get_sigma(t))
+        
+        return r_t1, z_hat_crude_half  # r at t-1, both (n,1)
+
         
 # Construct generator (encoder using forward diffusion to simulate channel)
     # By simulating channel it will try to come up with ways to fool discriminator/decoder
