@@ -188,13 +188,14 @@ class Decoder( TransformerDiffusion ):
     def call(self, r_t):
         for i in range(self.m):
             print(r_t.shape)
-            r_t, z_hat = self.rev_diff_call(r_t) # both (n,)
+            # both (n,)
+            r_t, z_hat = self.rev_diff_call(r_t) if not self.split_diff else self.split_rdiff_call(r_t)
 
             # Check if synd is 0 return r_t
             if tf.reduce_sum( self.get_syndrome(r_t) ) == 0:
-                return r_t[:, tf.newaxis], z_hat, i
+                return r_t, z_hat, i
 
-        return r_t[:, tf.newaxis], z_hat, i
+        return r_t, z_hat, i
 
     # Refines recieved codeword r at time t
     def rev_diff_call(self, r_t):
@@ -239,7 +240,6 @@ class Decoder( TransformerDiffusion ):
         r_t1 = r_t1 - 0.5 * self.fc(z_hat_crude_half * self.get_sigma(t))
         
         return r_t1, z_hat_crude_half  # r at t-1, both (n,1)
-
         
 # Construct generator (encoder using forward diffusion to simulate channel)
     # By simulating channel it will try to come up with ways to fool discriminator/decoder
