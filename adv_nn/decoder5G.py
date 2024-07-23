@@ -20,7 +20,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
     def __init__(self,
                  encoder,
                  args,
-                 out_llrs=False,
+                 return_llrs5g=True,
                  trainable=False,
                  cn_type='boxplus-phi',
                  hard_out=True,
@@ -96,8 +96,8 @@ class LDPC5GDecoder(LDPCBPDecoder):
                          output_dtype=output_dtype,
                          **kwargs)
         
-        self.out_llrs = out_llrs
-        if not self.out_llrs:
+        self.return_llrs5g = return_llr5g
+        if not self.return_llrs5g:
             args.code.H = pcm
             self._decoder = Decoder(args)
 
@@ -211,7 +211,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
 
         llr_5g = tf.concat([x1, z, x2], 1)
 
-        if self.out_llrs:
+        if self.return_llrs5g:
             return llr_5g
         
         else:
@@ -277,6 +277,4 @@ class LDPC5GDecoder(LDPCBPDecoder):
                     return x_out
                 else:
                     return x_out, msg_vn
-
-
-        
+ 
