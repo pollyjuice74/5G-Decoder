@@ -20,6 +20,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
     def __init__(self,
                  encoder,
                  args,
+                 out_llrs=True
                  trainable=False,
                  cn_type='boxplus-phi',
                  hard_out=True,
@@ -94,9 +95,10 @@ class LDPC5GDecoder(LDPCBPDecoder):
                          stateful=stateful,
                          output_dtype=output_dtype,
                          **kwargs)
-
-        args.code.H = pcm
-        self._decoder = Decoder(args)
+        if out_llrs:
+            args.code.H = pcm
+            self._decoder = Decoder(args)
+            self.out_llrs = out_llrs
 
     #########################################
     # Public methods and properties
@@ -125,7 +127,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
 
         self._old_shape_5g = input_shape
 
-    def call(self, inputs, out_llrs=True):
+    def call(self, inputs):
         """Iterative BP decoding function.
 
         This function performs ``num_iter`` belief propagation decoding
@@ -208,7 +210,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
 
         llr_5g = tf.concat([x1, z, x2], 1)
 
-        if out_llrs:
+        if self.out_llrs:
             return llr_5g
         
         else:
