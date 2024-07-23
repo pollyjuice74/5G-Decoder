@@ -30,11 +30,12 @@ class TransformerDiffusion( Layer ):
         code = args.code
         assert issparse(code.H), "Code's pcm must be sparse."
         self.pcm = code.H
-
+        # shapes
         self.m, self.n = self.pcm.shape
         self.k = self.n - self.m
 
         self.mask = self.create_mask(self.pcm)
+        # layers
         self.src_embed = tf.Variable( tf.random.uniform([1, self.n + self.m, args.d_model]), trainable=True )
         self.decoder = Transformer(args.d_model, args.heads, self.mask, args.t_layers)
         self.fc = Dense(1)
@@ -43,34 +44,9 @@ class TransformerDiffusion( Layer ):
 
         self.betas = tf.constant( tf.linspace(1e-3, 1e-2, args.n_steps)*0 + args.sigma )
         self.betas_bar = tf.constant( tf.math.cumsum(self.betas, 0) )
+
+        self.split_diff = False#args.split_diff
         self.ls_active = args.ls_active
-
-    def train(self, c_0, struct_noise=0, sim_ampl=True):
-        t = tf.random.uniform( (c_0.shape[0] // 2 + 1,), minval=0,maxval=self.n_steps, dtype=tf.int32 )
-        t = tf.concat([t, self.n_steps - t - 1], axis=0)[:c_0.shape[0]] # reshapes t to size x_0
-        t = tf.cast(t, dtype=tf.int32)
-
-        noise_factor = tf.math.sqrt( tf.gather(self.betas_bar, t) )
-        noise_factor = tf.reshape(noise_factor, (-1, 1))
-        z = tf.random.normal(c_0.shape)
-        h = np.random.rayleigh(size=c_0.shape)if sim_ampl else 1.
-
-        # added noise to codeword
-        c_t = tf.transpose(h * c_0 + struct_noise + (z*noise_factor))
-        # calculate sum of syndrome
-        t = tf.math.reduce_sum( self.get_syndrome( llr_to_bin(tf.sign(c_t)) ), axis=0 ) # (batch_size, 1)
-
-        z_hat = self.tran_call(c_t, t) # model prediction
-
-        if self.model_type=='dis':
-            z_mul = c_t * tf.transpose(c_0) # actual noise added through the channel
-
-        elif self.model_type=='gen':
-            c_t += z_hat # could contain positive or negative values
-            z_mul = c_t * tf.transpose(c_0) # moidfied channel noise st. it will fool the discriminator
-
-        z_mul = tf.reshape(z_mul, (z_hat.shape[0], -1))
-        return z_hat, llr_to_bin(z_mul), c_t
 
     def create_mask(self, H):
         m,n = H.shape
@@ -148,7 +124,8 @@ class TransformerDiffusion( Layer ):
         z_hat_values = l_values*(sigma*err_hat) # (n,b, l), l is lin_splits
         r_values = llr_to_bin(r_t - z_hat_values) # (n,b, l)
         # sum of synds (m,n)@(n,b*l)->(m,b*l)->(b*l, 1)
-        sum_synds = tf.reduce_sum( self.pcm.dot( tf.squeeze(r_values, axis=1) ) % 2, axis=0 )[:, tf.newaxis]
+        sum_synds = tf.reduce_sum( tf.abs( self.pcm.dot( tf.squeeze(r_values, axis=1) ) % 2 ),
+                                   axis=0 )[:, tf.newaxis]
         print(sum_synds.shape)
 
         # Pick optimal ls value
@@ -171,6 +148,33 @@ class TransformerDiffusion( Layer ):
                                              for tensor in [r_values, z_hat_values] ]
         print(r_t1, z_hat_values)
         return r_t1, z_hat # r at t-1
+
+    # def train(self, r_t, struct_noise=0, sim_ampl=True):
+    #     # t = tf.random.uniform( (c_0.shape[0] // 2 + 1,), minval=0,maxval=self.n_steps, dtype=tf.int32 )
+    #     # t = tf.concat([t, self.n_steps - t - 1], axis=0)[:c_0.shape[0]] # reshapes t to size x_0
+    #     # t = tf.cast(t, dtype=tf.int32)
+
+    #     # noise_factor = tf.math.sqrt( tf.gather(self.betas_bar, t) )
+    #     # noise_factor = tf.reshape(noise_factor, (-1, 1))
+    #     # z = tf.random.normal(c_0.shape)
+    #     # h = np.random.rayleigh(size=c_0.shape)if sim_ampl else 1.
+
+    #     # added noise to codeword
+    #     # c_t = tf.transpose(h * c_0 + struct_noise + (z*noise_factor))
+    #     # calculate sum of syndrome
+    #     t = tf.math.reduce_sum( self.get_syndrome( llr_to_bin(tf.sign(c_t)) ), axis=0 ) # (batch_size, 1)
+
+    #     z_hat = self.tran_call(c_t, t) # model prediction
+
+    #     if self.model_type=='dis':
+    #         z_mul = c_t * tf.transpose(c_0) # actual noise added through the channel
+
+    #     elif self.model_type=='gen':
+    #         c_t += z_hat # could contain positive or negative values
+    #         z_mul = c_t * tf.transpose(c_0) # moidfied channel noise st. it will fool the discriminator
+
+    #     z_mul = tf.reshape(z_mul, (z_hat.shape[0], -1))
+    #     return c_hat, synd #z_hat, llr_to_bin(z_mul), c_t
 
 # Construct discriminator (decoder using reverse diffusion)
     # Will have to come up with ways to try to decode the noised codeword against specific noise
