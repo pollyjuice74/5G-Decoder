@@ -20,7 +20,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
     def __init__(self,
                  encoder,
                  args,
-                 out_llrs=True
+                 out_llrs=True,
                  trainable=False,
                  cn_type='boxplus-phi',
                  hard_out=True,
