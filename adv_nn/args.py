@@ -9,7 +9,7 @@ from scipy.sparse import issparse, csr_matrix
 
 class Args():
     def __init__(self, model_type, code_type='LDPC', n_look_up=121, k_look_up=80, n=400, k=200,
-                       n_rings=2, ls_active=True, sigma=0.1,
+                       n_rings=2, ls_active=True, split_diff=True, sigma=0.1,
                        t_layers=1, d_model=128, heads=8, lr=5e-4, batch_size=128, 
                        traindata_len=500, testdata_len=250, epochs=1000):
         assert model_type in ['gen', 'dis'], "Type must be: 'gen', Generator or 'dis', Discriminator."
@@ -17,7 +17,8 @@ class Args():
         
         self.model_type = model_type
         self.code_type = code_type
-                           
+
+        self.split_diff = split_diff
         self.n_rings = n_rings # ring connectivity of mask
         self.sigma = sigma
         self.t_layers = t_layers
