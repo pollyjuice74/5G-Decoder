@@ -5,7 +5,7 @@ import numpy as np
 import scipy as sp
 from scipy.sparse import issparse, csr_matrix, coo_matrix
 
-from dataset import sign_to_bin
+from dataset import sign_to_bin, llr_to_bin
 from transformer import * 
 
 ## Generative Adversarial Network approach
