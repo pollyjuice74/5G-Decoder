@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Layer, Embedding, Dense
 import numpy as np
+from scipy.sparse import issparse, csr_matrix, coo_matrix
 
 from dataset import sign_to_bin
 from transformer import * 
