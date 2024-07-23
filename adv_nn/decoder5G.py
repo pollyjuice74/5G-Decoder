@@ -20,7 +20,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
     def __init__(self,
                  encoder,
                  args,
-                 out_llrs=True,
+                 out_llrs=False,
                  trainable=False,
                  cn_type='boxplus-phi',
                  hard_out=True,
@@ -95,10 +95,11 @@ class LDPC5GDecoder(LDPCBPDecoder):
                          stateful=stateful,
                          output_dtype=output_dtype,
                          **kwargs)
-        if out_llrs:
+        
+        self.out_llrs = out_llrs
+        if not self.out_llrs:
             args.code.H = pcm
             self._decoder = Decoder(args)
-            self.out_llrs = out_llrs
 
     #########################################
     # Public methods and properties
@@ -276,4 +277,5 @@ class LDPC5GDecoder(LDPCBPDecoder):
                     return x_out
                 else:
                     return x_out, msg_vn
+
         
