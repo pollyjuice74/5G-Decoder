@@ -1,8 +1,8 @@
 import tensorflow as tf
 from DDECC.src.codes import Get_Generator_and_Parity
 
-from sionna.fec.ldpc.encoding import LDPC5GEncoder
-from decoder5G import LDPC5GDecoder
+# from sionna.fec.ldpc.encoding import LDPC5GEncoder
+# from decoder5G import LDPC5GDecoder
 
 from scipy.sparse import issparse, csr_matrix
 
