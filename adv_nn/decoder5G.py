@@ -96,7 +96,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
                          output_dtype=output_dtype,
                          **kwargs)
         
-        self.return_llrs5g = return_llr5g
+        self.return_llrs5g = return_llrs5g
         if not self.return_llrs5g:
             args.code.H = pcm
             self._decoder = Decoder(args)
