@@ -40,6 +40,7 @@ class TransformerDiffusion( Layer ):
         self.decoder = Transformer(args.d_model, args.heads, self.mask, args.t_layers)
         self.fc = Dense(1)
         self.to_n = Dense(1)
+        self.to_m = Dense(1)
         self.time_embed = Embedding(args.n_steps, args.d_model)
 
         self.betas = tf.constant( tf.linspace(1e-3, 1e-2, args.n_steps)*0 + args.sigma )
@@ -47,6 +48,9 @@ class TransformerDiffusion( Layer ):
 
         self.split_diff = False#args.split_diff
         self.ls_active = args.ls_active
+
+        scheduler = tf.keras.optimizers.schedules.CosineDecay( initial_learning_rate=args.lr, decay_steps=args.epochs ) # 1000 is size of trainloader
+        self.optimizer =  tf.keras.optimizers.Adam(learning_rate=scheduler)
 
     def create_mask(self, H):
         m,n = H.shape
@@ -94,7 +98,7 @@ class TransformerDiffusion( Layer ):
 
         # Concatenate synd and magn
         nodes = tf.concat([magnitude, syndrome], axis=0) # data for vertices
-        nodes = tf.reshape(nodes, (1, self.pcm.shape[0]+self.n, -1)) # (1, n+m, b)
+        nodes = tf.reshape(nodes, (1, self.n+self.m, -1)) # (1, n+m, b)
         print(nodes.shape)
 
         # Embedding nodes w/ attn and 'time' (sum syn errs) dims
@@ -108,11 +112,15 @@ class TransformerDiffusion( Layer ):
 
         # Reduce (d,n+m,d)->(d,n+m)
         logits = tf.squeeze( self.fc(logits), axis=-1 )
-        node_logits = tf.reshape( logits[:, :self.n], (self.n, -1) ) # (n,d) take the first n logits from the concatenation
-        # (n,d)->(n,)
-        z_hat = self.to_n(node_logits)
+        vn_logits = tf.reshape( logits[:, :self.n], (self.n, -1) ) # (n,d) take the first n logits from the concatenation
+        cn_logits = tf.reshape( logits[:, self.n:], (self.m, -1) ) # (m,d) take the last m logits from the concatenation
+        print(vn_logits, cn_logits)
+
+        z_hat = self.to_n(vn_logits)# (n,d)->(n,)
+        synd = self.to_m(cn_logits)# (m,d)->(m,)
         print(logits.shape, z_hat.shape)
-        return z_hat
+
+        return z_hat, synd
 
     # optimal lambda l for theoretical and for error prediction
     def line_search(self, r_t, sigma, err_hat, lin_splits=20):
@@ -148,6 +156,18 @@ class TransformerDiffusion( Layer ):
                                              for tensor in [r_values, z_hat_values] ]
         print(r_t1, z_hat_values)
         return r_t1, z_hat # r at t-1
+
+    def loss_fn(self, synd):
+        return tf.reduce_mean(tf.square(synd))
+
+    def train_step(self, llr_ch):
+        with tf.GradientTape() as tape:
+            _, synd = self.tran_call(llr_ch,
+                                     tf.reduce_sum( self.get_syndrome(llr_ch) ))
+            loss = self.loss_fn(synd)
+        gradients = tape.gradient(loss, self.trainable_variables)
+        self.optimizer.apply_gradients(zip(gradients, self.trainable_variables))
+        return loss
 
     # def train(self, r_t, struct_noise=0, sim_ampl=True):
     #     # t = tf.random.uniform( (c_0.shape[0] // 2 + 1,), minval=0,maxval=self.n_steps, dtype=tf.int32 )
@@ -211,7 +231,7 @@ class Decoder( TransformerDiffusion ):
         t = tf.cast(tf.abs(t), dtype=tf.int32)
 
         # Transformer error prediction
-        z_hat_crude = self.tran_call(r_t, t) # (n,1)
+        z_hat_crude, synd = self.tran_call(r_t, t) # (n,1), (m,1)
         print("z_hat_crude: ", z_hat_crude)
 
         # Compute diffusion vars
@@ -231,18 +251,18 @@ class Decoder( TransformerDiffusion ):
         r_t = tf.reshape(r_t, (self.n, -1))  # (n,b)
         t = tf.reduce_sum(self.get_syndrome(llr_to_bin(r_t)), axis=0)  # (m,n)@(n,b)->(m,b)->(1,b)
         t = tf.cast(tf.abs(t), dtype=tf.int32)
-        
+
         # First half-step condition subproblem
-        z_hat_crude = self.tran_call(r_t, t)
+        z_hat_crude, synd = self.tran_call(r_t, t)
         r_t_half = r_t - 0.5 * self.fc(z_hat_crude * self.get_sigma(t))
-        
+
         # Full-step diffusion subproblem
         r_t1 = r_t_half + tf.random.normal(r_t_half.shape) * tf.sqrt(self.get_sigma(t))
-        
+
         # Second half-step condition subproblem
-        z_hat_crude_half = self.tran_call(r_t1, t)  # Reuse the second `tran_call`
+        z_hat_crude_half, synd = self.tran_call(r_t1, t)  # Reuse the second `tran_call`
         r_t1 = r_t1 - 0.5 * self.fc(z_hat_crude_half * self.get_sigma(t))
-        
+
         return r_t1, z_hat_crude_half  # r at t-1, both (n,1)
         
 # Construct generator (encoder using forward diffusion to simulate channel)
