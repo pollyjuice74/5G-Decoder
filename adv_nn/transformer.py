@@ -5,6 +5,17 @@ c = lambda x: copy.deepcopy(x)
 from attention import *
 
 
+class TransformerLayer(Layer):
+    def __init__(self, attn, ff, norm):
+        super().__init__()
+        self.attn, self.ff = attn, ff
+        self.norm1, self.norm2 = c(norm), c(norm)
+
+    def call(self, x, mask):
+        out = self.norm1( self.attn(x, mask) )
+        return self.norm2( self.ff(out) )
+
+
 class Transformer(Layer):
     def __init__(self, d_model, heads, mask, N):
         super().__init__()
@@ -17,14 +28,3 @@ class Transformer(Layer):
         for transformer in self.transformer_layers:
             x = transformer(x, self.mask)
         return x
-
-
-class TransformerLayer(Layer):
-    def __init__(self, attn, ff, norm):
-        super().__init__()
-        self.attn, self.ff = attn, ff
-        self.norm1, self.norm2 = c(norm), c(norm)
-
-    def call(self, x, mask):
-        out = self.norm1( self.attn(x, mask) )
-        return self.norm2( self.ff(out) )
