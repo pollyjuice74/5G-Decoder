@@ -11,6 +11,70 @@ def test_gen():
     pass
 
 
+# dec5G = LDPC5GDecoder(enc5G, args, return_llrs5g=True)
+# dec = Decoder(args)
+def train_dec_5G(dec5G, epoch, training_len=100):
+    loss_fn = tf.keras.losses.BinaryCrossentropy()
+    t = time.time()
+
+    for batch_idx in range(training_len):
+        u = binary_source([1, args.k])
+        c = enc5G(u) # (1,n)
+
+        x = mapper(c) # map c to symbols x
+        y = channel([x, no]) # transmit over AWGN channel
+        llr_ch = demapper([y, no]) # demap y to LLRs (1,n)
+
+        if dec5G.return_llrs5g:
+            llr_5g = dec5G(llr_ch)
+
+            loss = dec.train_step(llr_5g)
+
+        else:
+            c_hat = dec5G(llr_ch)
+            print("c, c_hat: ", c, c_hat)
+            loss = loss_fn(c_hat, c)
+
+        if (batch_idx + 1) % 1 == 0:
+            print(f'Training epoch {epoch}, Batch {batch_idx + 1}/{training_len}, Loss={loss.numpy():.5e}')
+
+    print(f'Epoch {epoch} Train Time {time.time() - t}s\n')
+
+
+# dec5G = LDPC5GDecoder(enc5G, args, return_llrs5g=False, return_infobits=True)
+def test_dec_5G(dec5G, no, testing_len=100):
+    # printed = False
+    ber_list, bler_list = [], []
+
+    for batch_idx in range(testing_len):
+        u = binary_source([1, args.k])
+        c = enc5G(u) # (1,n)
+
+        x = mapper(c) # map c to symbols x
+        y = channel([x, no]) # transmit over AWGN channel
+        llr_ch = demapper([y, no]) # demap y to LLRs (1,n)
+
+        if dec5G._return_infobits: 
+            u_hat = dec5G(llr_ch)
+            ber_list.append( compute_ber(u, u_hat) ) # BER
+            bler_list.append( compute_bler(u, u_hat) ) # BLER
+        else: # return cw
+            c_hat = dec5G(llr_ch)
+            ber_list.append( compute_ber(c, c_hat) ) # BER
+            bler_list.append( compute_bler(c, c_hat) ) # BLER
+
+        print(f'Test EbN0={no}, BER={ber_list[-1]}')
+        print(f'Test EbN0={no}, BLER={bler_list[-1]}')
+
+        # if not printed:
+        #     tensor, pred = u, u_hat if dec5G._return_infobits else c, c_hat
+        #     print(f"info_tensor: {tensor}, pred: {pred}")
+        #     printed = True
+        # break
+
+    return { "ber": ber_list, "bler": bler_list }
+
+
 def train_dec(model, train_loader, optimizer, epoch, LR, traindata_len):
     loss_fn = tf.keras.losses.BinaryCrossentropy()
     t = time.time()
