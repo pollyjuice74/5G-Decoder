@@ -28,7 +28,7 @@ class PreNorm(Layer):
 
 
 class MHAttention(Layer):
-    def __init__(self, dims, heads, linear=True, k_proj=256, dropout=0.01):
+    def __init__(self, dims, heads, mask_length, linear=True, dropout=0.01):
         super().__init__()
         assert (dims % heads) == 0, 'dimension must be divisible by the number of heads'
         self.linear = linear
@@ -37,17 +37,23 @@ class MHAttention(Layer):
         self.dim_head = dims // heads
 
         if linear:
-            self.k_proj = k_proj
+            self.k_proj = self.get_k_proj(mask_length) # n+m
             self.proj_k = None
             self.proj_v = None              
 
         self.to_q, self.to_k, self.to_v = [ Dense(self.dims, use_bias=False) for _ in range(3) ]
         self.to_out = Dense(dims)
         self.dropout = Dropout(dropout) # to d-dimentional embeddings
-            
+
     def call(self, x, mask=None):
         out_att = self.lin_attention(x, mask) if self.linear else self.attention(x, mask)
         return out_att
+            
+    def get_k_proj(self, mask_length):
+        # gets dimention for linear tranformer vector projection
+        for k_proj in range(mask_length // 2, 0, -1): # starts at half the mask length TO 0
+            if mask_length % k_proj == 0:
+                return k_proj
 
     def lin_attention(self, x, mask): # O(n)
         b,n,_ = tf.shape(x)
@@ -101,3 +107,6 @@ class MHAttention(Layer):
         out = tf.transpose(out, [0, 2, 1, 3])
         out = tf.reshape(out, (b, n, -1))
         return self.to_out(out)
+
+
+
