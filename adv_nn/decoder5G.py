@@ -23,7 +23,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
                  return_llrs5g=True,
                  trainable=False,
                  cn_type='boxplus-phi',
-                 hard_out=True,
+                 hard_out=False,
                  track_exit=False,
                  return_infobits=False,
                  prune_pcm=True,
@@ -96,10 +96,9 @@ class LDPC5GDecoder(LDPCBPDecoder):
                          output_dtype=output_dtype,
                          **kwargs)
         
-        self.return_llrs5g = return_llrs5g
-        if not self.return_llrs5g:
-            args.code.H = pcm
-            self._decoder = Decoder(args)
+        self._decoderreturn_llrs5g = return_llrs5g
+        args.code.H = pcm
+        self._decoder = Decoder(args)
 
     #########################################
     # Public methods and properties
@@ -217,8 +216,11 @@ class LDPC5GDecoder(LDPCBPDecoder):
         else:
             # DECODER
             ############################################################
-            x_hat, _, _ = self._decoder(llr_5g) #super().call(llr_5g)
-            x_hat = tf.transpose(x_hat) # (b, n_ldpc)
+            x_hat = super().call(llr_5g)
+            r_t, _, _ = self._decoder(llr_5g) 
+            # x_hat = tf.transpose(x_hat) # (b, n_ldpc)
+
+            print(r_t, x_hat)
             ############################################################
 
             if self._return_infobits: # return only info bits
