@@ -23,7 +23,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
                  return_llrs5g=True,
                  trainable=False,
                  cn_type='boxplus-phi',
-                 hard_out=False,
+                 hard_out=True,
                  track_exit=False,
                  return_infobits=False,
                  prune_pcm=True,
@@ -96,7 +96,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
                          output_dtype=output_dtype,
                          **kwargs)
         
-        self._decoderreturn_llrs5g = return_llrs5g
+        self._return_llrs5g = return_llrs5g
         args.code.H = pcm
         self._decoder = Decoder(args)
 
@@ -210,17 +210,16 @@ class LDPC5GDecoder(LDPCBPDecoder):
 
         llr_5g = tf.concat([x1, z, x2], 1)
 
-        if self.return_llrs5g:
+        if self._return_llrs5g:
             return llr_5g
         
         else:
             # DECODER
             ############################################################
-            x_hat = super().call(llr_5g)
-            r_t, _, _ = self._decoder(llr_5g) 
-            # x_hat = tf.transpose(x_hat) # (b, n_ldpc)
-
-            print(r_t, x_hat)
+            # x_hat = super().call(llr_5g)
+            x_hat, _, _ = self._decoder(llr_5g) 
+            x_hat = tf.transpose(x_hat) # (b, n_ldpc)
+            # print(r_t, x_hat)
             ############################################################
 
             if self._return_infobits: # return only info bits
@@ -270,7 +269,7 @@ class LDPC5GDecoder(LDPCBPDecoder):
                 # Reshape x_short so that it matches the original input dimensions
                 # overwrite first dimension as this could be None (Keras)
                 llr_ch_shape[0] = -1
-                x_short= tf.reshape(x_short, llr_ch_shape)
+                x_short = tf.reshape(x_short, llr_ch_shape)
 
                 # enable other output datatypes than tf.float32
                 x_out = tf.cast(x_short, self._output_dtype)
@@ -279,4 +278,3 @@ class LDPC5GDecoder(LDPCBPDecoder):
                     return x_out
                 else:
                     return x_out, msg_vn
- 
