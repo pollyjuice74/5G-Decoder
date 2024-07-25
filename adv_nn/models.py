@@ -99,7 +99,7 @@ class TransformerDiffusion( Layer ):
         # Concatenate synd and magn
         nodes = tf.concat([magnitude, syndrome], axis=0) # data for vertices
         nodes = tf.reshape(nodes, (1, self.n+self.m, -1)) # (1, n+m, b)
-        print(nodes.shape)
+        # print(nodes.shape)
 
         # Embedding nodes w/ attn and 'time' (sum syn errs) dims
         nodes_emb = tf.reshape( self.src_embed * nodes, (self.src_embed.shape[-1], self.pcm.shape[0]+self.n, -1) ) # (d,n+m,b)
@@ -108,17 +108,17 @@ class TransformerDiffusion( Layer ):
         # Applying embeds
         emb_t = time_emb * nodes_emb # (d, n+m, b)
         logits = self.decoder(emb_t) # (d, n+m, d) # TODO: missing batch dims b
-        print(emb_t, logits)
+        # print(emb_t, logits)
 
         # Reduce (d,n+m,d)->(d,n+m)
         logits = tf.squeeze( self.fc(logits), axis=-1 )
         vn_logits = tf.reshape( logits[:, :self.n], (self.n, -1) ) # (n,d) take the first n logits from the concatenation
         cn_logits = tf.reshape( logits[:, self.n:], (self.m, -1) ) # (m,d) take the last m logits from the concatenation
-        print(vn_logits, cn_logits)
+        # print(vn_logits, cn_logits)
 
         z_hat = self.to_n(vn_logits)# (n,d)->(n,)
         synd = self.to_m(cn_logits)# (m,d)->(m,)
-        print(logits.shape, z_hat.shape)
+        # print(logits.shape, z_hat.shape)
 
         return z_hat, synd
 
@@ -126,7 +126,7 @@ class TransformerDiffusion( Layer ):
     def line_search(self, r_t, sigma, err_hat, lin_splits=20):
         l_values =  tf.reshape( tf.linspace(1., 20., lin_splits), (1, 1, lin_splits) )
         r_t, sigma, err_hat = [ tf.expand_dims(tensor, axis=-1) for tensor in [r_t, sigma, err_hat] ]# (n,b, 1)
-        print(f"sigma: {sigma}, err_hat: {err_hat}")
+        # print(f"sigma: {sigma}, err_hat: {err_hat}")
 
         # Compute theoretical step size w/ ls splits
         z_hat_values = l_values*(sigma*err_hat) # (n,b, l), l is lin_splits
@@ -134,7 +134,7 @@ class TransformerDiffusion( Layer ):
         # sum of synds (m,n)@(n,b*l)->(m,b*l)->(b*l, 1)
         sum_synds = tf.reduce_sum( tf.abs( self.pcm.dot( tf.squeeze(r_values, axis=1) ) % 2 ),
                                    axis=0 )[:, tf.newaxis]
-        print(sum_synds.shape)
+        # print(sum_synds.shape)
 
         # Pick optimal ls value
         if self.model_type=='dis':
@@ -142,7 +142,7 @@ class TransformerDiffusion( Layer ):
         elif self.model_type=='gen':
              ixs = tf.math.argmax(sum_synds, axis=0, output_type=tf.int32) # (b,1)
 
-        print(r_values.shape, z_hat_values.shape, ixs.shape)
+        # print(r_values.shape, z_hat_values.shape, ixs.shape)
         # (b, l, n) for indexing on l
         r_values, z_hat_values = [ tf.transpose(tensor, perm=[1,2,0])
                                             for tensor in [r_values, z_hat_values] ]
@@ -154,7 +154,7 @@ class TransformerDiffusion( Layer ):
         # ix on lin_splits w/ gather_nd st. ix,(b, l, n)->(n,b)
         r_t1, z_hat = [ tf.reshape( tf.gather_nd(tensor, indices), (self.n, -1) )
                                              for tensor in [r_values, z_hat_values] ]
-        print(r_t1, z_hat_values)
+        # print(r_t1, z_hat_values)
         return r_t1, z_hat # r at t-1
 
     def loss_fn(self, synd):
@@ -232,11 +232,11 @@ class Decoder( TransformerDiffusion ):
 
         # Transformer error prediction
         z_hat_crude, synd = self.tran_call(r_t, t) # (n,1), (m,1)
-        print("z_hat_crude: ", z_hat_crude)
+        # print("z_hat_crude: ", z_hat_crude)
 
         # Compute diffusion vars
         sigma = self.get_sigma(t) # theoretical step size
-        print("sigma: ", sigma)
+        # print("sigma: ", sigma)
         err_hat = r_t - tf.sign(z_hat_crude * r_t) # (n,1)
 
         # Refined estimate of the codeword for the ls diffusion step
