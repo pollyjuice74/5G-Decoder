@@ -2,6 +2,8 @@
 
 The draft for the paper can be found [here](Linear_Transformer_Diffusion_Model.pdf) or the `Linear_Transformer_Diffusion_Model.pdf` file above.
 
+*** ReadMe is outdated ***
+
 # Adversarial Neural Network Implementation
 
 Contains a **tensorflow** implementation for scalability of a `Discriminator` and a `Generator` where the discriminator decodes a recieved codeword `r`
