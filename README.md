@@ -1,5 +1,6 @@
 # REU-LDPC-Project
 
+The draft for the paper can be found [here](Linear_Transformer_Diffusion_Model.pdf) or the `Linear_Transformer_Diffusion_Model.pdf` file above.
 
 # Adversarial Neural Network Implementation
 
