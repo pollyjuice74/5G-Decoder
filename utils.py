@@ -10,53 +10,8 @@ from sionna.fec.ldpc.encoding import LDPC5GEncoder
 from sionna.fec.ldpc.decoding import LDPC5GDecoder
 
 
-
 class E2EModel(tf.keras.Model):
-    """End-to-end model for (GNN-)decoder evaluation.
-
-    Parameters
-    ----------
-    encoder: Layer or None
-        Encoder layer, no encoding applied if None.
-
-    decoder: Layer or None
-        Decoder layer, no decoding applied if None.
-
-    k: int
-        Number of information bits per codeword.
-
-    n: int
-        Codeword lengths.
-
-    return_infobits: Boolean
-        Defaults to False. If True, only the ``k`` information bits are
-        returned. Must be supported be the decoder as well.
-
-    es_no: Boolean
-        Defaults to False. If True, the SNR is not rate-adjusted (i.e., Es/N0).
-
-    Input
-    -----
-        batch_size: int or tf.int
-            The batch_size used for the simulation.
-
-        ebno_db: float or tf.float
-            A float defining the simulation SNR.
-
-    Output
-    ------
-        (c, llr):
-            Tuple:
-
-        c: tf.float32
-            A tensor of shape `[batch_size, n] of 0s and 1s containing the
-            transmitted codeword bits.
-
-        llr: tf.float32
-            A tensor of shape `[batch_size, n] of llrs containing estimated on
-            the codeword bits.
-    """
-
+    """End-to-end model for (GNN-)decoder evaluation."""
     def __init__(self, encoder, decoder, k, n, return_infobits=False, es_no=False):
         super().__init__()
 
