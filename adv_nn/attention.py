@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Dense, Dropout, LayerNormalization, Layer
 from tensorflow.keras.initializers import GlorotUniform
 from tensorflow.keras.activations import gelu
+from tensorflow.keras import saving
 
 
 class FeedForward(Layer):
@@ -17,14 +18,24 @@ class FeedForward(Layer):
         return self.w2(self.dropout(x))
 
 
+@saving.register_keras_serializable()
 class PreNorm(Layer):
-    def __init__(self, dropout=0.01):
-        super().__init__()
+    def __init__(self, dropout=0.01, **kwargs):
+        super().__init__(**kwargs)
         self.norm = LayerNormalization()
         self.dropout = Dropout(dropout)
         
     def call(self, x):
         return self.norm(self.dropout(x))
+
+    def get_config(self):
+        config = super(PreNorm, self).get_config()
+        config.update({"dropout": self.dropout.rate})
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
 
 
 class MHAttention(Layer):
