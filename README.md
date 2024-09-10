@@ -6,11 +6,11 @@ The draft for the paper can be found [here](Linear_Transformer_Diffusion_Model.p
 
 # Adversarial Neural Network Implementation
 
-Contains a **tensorflow** implementation for scalability of a `Discriminator` and a `Generator` where the discriminator decodes a recieved codeword `r`
+Contains a **tensorflow** implementation for scalability of a `Decoder/Discriminator` and a `Generator` where the discriminator decodes a recieved codeword `r`
 and generator adds noise `z_G` to a codeword `c` such that it will increase the discriminator's `BER` performance 
 on a given `EbN0` signal to noise ratio. 
 
-The `Discriminator` is implemented using low-rank projections and splitting numerical methods to decrease the time complexity 
+The `Decoder/Discriminator` is implemented using low-rank projections and splitting numerical methods to decrease the time complexity 
 of the transformer and diffusion respectively such that it will have competetive time complity with existing GNN/BP 5G 
 decoding approaches of `O( Iters * |edges(H)| )`. 
 
