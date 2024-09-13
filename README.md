@@ -5,10 +5,10 @@ This repo currently implemented a Transformer/Diffusion based linear code decode
 The draft for the paper can be found [here](Linear_Transformer_Diffusion_Model.pdf) or the `Linear_Transformer_Diffusion_Model.pdf` file above.
 
 
-# Results
+## Results
 
 
-# Adversarial Neural Network Implementation
+## Adversarial Neural Network Implementation
 
 Contains a **tensorflow** implementation for scalability of a `Decoder/Discriminator` and a `Generator` where the discriminator decodes a recieved codeword `r`
 and generator adds noise `z_G` to a codeword `c` such that it will increase the discriminator's `BER` performance 
