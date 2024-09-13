@@ -24,7 +24,7 @@ These results can be found on the `LinearTranDiff.ipynb` notebook.
 
 ## Overview
 
-- `LinearTranDiff.ipynb` running Discriminator on datasets and making sure layers work properly.
+- `LinearTranDiff.ipynb` running Decoder/Discriminator on datasets and making sure layers work properly.
 
 In `adv_nn/` folder: 
 - `models.py` Discriminator and Generator models.
