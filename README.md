@@ -1,8 +1,12 @@
-# REU-LDPC-Project
+# 5G LDPC Decoder
+
+This repo currently implemented a Transformer/Diffusion based linear code decoder
 
 The draft for the paper can be found [here](Linear_Transformer_Diffusion_Model.pdf) or the `Linear_Transformer_Diffusion_Model.pdf` file above.
 
-*** ReadMe is outdated ***
+
+# Results
+
 
 # Adversarial Neural Network Implementation
 
@@ -34,15 +38,12 @@ In `adv_nn/` folder:
 - `dataset.py` dataset with dataset types: zero_cw, ones_m, flip_cw, random_bits.
 - `args.py` class holding arguments for the models and datasets.
 
-## Resources
-
-
-
 
 ## TODO
-- Implement PCM using PyGeometric
-- Create channel using Sionna
-- Create model with (i) positional encoding, (ii) local message-passing, (iii) global attention
+- Decode LDPC codes on Sionna's functions for constructing parity check matrixes.
+- Decode LDPC codes on 5G protocol.
+- Compare performance results to current state of the art 5G decoders.
+
 
 ## Resources
 
