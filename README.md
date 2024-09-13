@@ -24,10 +24,9 @@ These results can be found on the `LinearTranDiff.ipynb` notebook.
 
 ## Overview
 
-In `adv_nn/` folder: 
-
 - `LinearTranDiff.ipynb` running Discriminator on datasets and making sure layers work properly.
 
+In `adv_nn/` folder: 
 - `models.py` Discriminator and Generator models.
 - `model_functs.py` train/test functions for models.
 - `channel.py` end-to-end channel between Discriminator and Generator.
@@ -42,6 +41,7 @@ In `adv_nn/` folder:
 ## TODO
 - Decode LDPC codes on Sionna's functions for constructing parity check matrixes.
 - Decode LDPC codes on 5G protocol.
+- Adversarial Training
 - Compare performance results to current state of the art 5G decoders.
 
 
