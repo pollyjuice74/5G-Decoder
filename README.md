@@ -1,13 +1,5 @@
 # 5G LDPC Decoder
 
-This repo currently implemented a Transformer/Diffusion based linear code decoder
-
-The draft for the paper can be found [here](Linear_Transformer_Diffusion_Model.pdf) or the `Linear_Transformer_Diffusion_Model.pdf` file above.
-
-
-## Results
-
-
 ## Adversarial Neural Network Implementation
 
 Contains a **tensorflow** implementation for scalability of a `Decoder/Discriminator` and a `Generator` where the discriminator decodes a recieved codeword `r`
@@ -20,7 +12,15 @@ decoding approaches of `O( Iters * |edges(H)| )`.
 
 The `Generator` is implemented similarly.
 
----
+The draft for the paper can be found [here](Linear_Transformer_Diffusion_Model.pdf) or the `Linear_Transformer_Diffusion_Model.pdf` file above.
+
+## Results
+It got 0 Bit Error Rate (decoded all errors) for EbNos between 5-13dB (5 is more noise like in a city with many wifi and cellular signals interfering, 10-20 is similar to a open space with less signal overlap) from a custom dataset that adds noise based on a normal distribution and a rayleigh distribution that simulates real world multipath noise (noise overlap from multiple sources). It takes a recieved vector `y = f(x) + z`, where `x` is a all zeros vector that is the original binary bits sent, `f` is a phase shift keying mapping binary bits to a real number signal to send through the channel, `z` is a real number noise vector form the normal and rayleigh distributions. 
+
+The relative time it decodes on a Google Colab TPU was 100 vectors of size 121 with a parity check matrix of size 121,44 at 60 seconds. 
+
+These results can be found on the `LinearTranDiff.ipynb` notebook.
+
 
 ## Overview
 
