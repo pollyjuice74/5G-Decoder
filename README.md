@@ -1,5 +1,7 @@
 # 5G LDPC Decoder
 
+**This research project is still in progress.**
+
 ## Adversarial Neural Network Implementation
 
 Contains a **tensorflow** implementation for scalability of a `Decoder/Discriminator` and a `Generator` where the discriminator decodes a recieved codeword `r`
