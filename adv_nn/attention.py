@@ -67,7 +67,10 @@ class MHAttention(Layer):
                 return k_proj
 
     def lin_attention(self, x, mask): # O(n)
-        b,n,_ = tf.shape(x)
+        shape = tf.shape(x)
+        b = shape[0]
+        n = shape[1]
+        
         query, key, val = self.to_q(x), self.to_k(x), self.to_v(x)
 
         # Creates shape (n,k_proj) proj matrices for key and val 
@@ -104,7 +107,10 @@ class MHAttention(Layer):
         return self.to_out(out)
 
     def attention(self, mask): # O(n^2)
-        b,n,_ = tf.shape(x)
+        shape = tf.shape(x)
+        b = shape[0]
+        n = shape[1]
+        
         query, key, val = self.to_q(x), self.to_k(x), self.to_v(x)
         query, key, val = [ tf.reshape(x, (b, n, self.heads, self.dim_head)) for x in [query, key, val] ]
         query, key, val = [ tf.transpose(x, [0, 2, 1, 3]) for x in [query, key, val] ]
