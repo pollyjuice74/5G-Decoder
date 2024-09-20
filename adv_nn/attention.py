@@ -56,6 +56,14 @@ class MHAttention(Layer):
         self.to_out = Dense(dims)
         self.dropout = Dropout(dropout) # to d-dimentional embeddings
 
+    def build(self, input_shape):
+        # Creates shape (n,k_proj) proj matrices for key and val in linear attention
+        n_value = input_shape[1]
+
+        if self.linear:
+            self.proj_k = self.add_weight("proj_k", shape=[n_value, self.k_proj], initializer=GlorotUniform())
+            self.proj_v = self.add_weight("proj_v", shape=[n_value, self.k_proj], initializer=GlorotUniform())
+
     def call(self, x, mask=None):
         out_att = self.lin_attention(x, mask) if self.linear else self.attention(x, mask)
         return out_att
@@ -64,20 +72,14 @@ class MHAttention(Layer):
         # gets dimention for linear tranformer vector projection
         for k_proj in range(mask_length // 2, 0, -1): # starts at half the mask length TO 0
             if mask_length % k_proj == 0:
-                return k_proj
+                return tf.cast(k_proj, tf.int32)
 
     def lin_attention(self, x, mask): # O(n)
         shape = tf.shape(x)
-        b = shape[0]
-        n = shape[1]
+        b = tf.cast(shape[0], tf.int32)
+        n = tf.cast(shape[1], tf.int32)
         
         query, key, val = self.to_q(x), self.to_k(x), self.to_v(x)
-
-        # Creates shape (n,k_proj) proj matrices for key and val 
-        if self.proj_k is None or self.proj_v is None: 
-            # TODO: Could make projs dense layers #
-            self.proj_k = self.add_weight("proj_k", shape=[n, self.k_proj], initializer=GlorotUniform())
-            self.proj_v = self.add_weight("proj_v", shape=[n, self.k_proj], initializer=GlorotUniform())
 
         # Project key and val into k-dimentional space
         key = tf.einsum('bnd,nk->bkd', key, self.proj_k)
@@ -110,7 +112,7 @@ class MHAttention(Layer):
         shape = tf.shape(x)
         b = shape[0]
         n = shape[1]
-        
+
         query, key, val = self.to_q(x), self.to_k(x), self.to_v(x)
         query, key, val = [ tf.reshape(x, (b, n, self.heads, self.dim_head)) for x in [query, key, val] ]
         query, key, val = [ tf.transpose(x, [0, 2, 1, 3]) for x in [query, key, val] ]
@@ -124,6 +126,3 @@ class MHAttention(Layer):
         out = tf.transpose(out, [0, 2, 1, 3])
         out = tf.reshape(out, (b, n, -1))
         return self.to_out(out)
-
-
-
