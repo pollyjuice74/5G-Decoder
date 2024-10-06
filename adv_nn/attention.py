@@ -50,16 +50,14 @@ class MHAttention(Layer):
         if linear:
             self.k_proj = self.get_k_proj(mask_length) # n+m
             self.proj_k = None
-            self.proj_v = None              
+            self.proj_v = None
 
         self.to_q, self.to_k, self.to_v = [ Dense(self.dims, use_bias=False) for _ in range(3) ]
         self.to_out = Dense(dims)
         self.dropout = Dropout(dropout) # to d-dimentional embeddings
 
     def build(self, input_shape):
-        # Creates shape (n,k_proj) proj matrices for key and val in linear attention
-        n_value = input_shape[1]
-
+        # Creates shape (n,k_proj) proj matrices for key and  
         if self.linear:
             self.proj_k = self.add_weight("proj_k", shape=[n_value, self.k_proj], initializer=GlorotUniform())
             self.proj_v = self.add_weight("proj_v", shape=[n_value, self.k_proj], initializer=GlorotUniform())
@@ -67,7 +65,7 @@ class MHAttention(Layer):
     def call(self, x, mask=None):
         out_att = self.lin_attention(x, mask) if self.linear else self.attention(x, mask)
         return out_att
-            
+
     def get_k_proj(self, mask_length):
         # gets dimention for linear tranformer vector projection
         for k_proj in range(mask_length // 2, 0, -1): # starts at half the mask length TO 0
@@ -75,10 +73,12 @@ class MHAttention(Layer):
                 return tf.cast(k_proj, tf.int32)
 
     def lin_attention(self, x, mask): # O(n)
-        shape = tf.shape(x)
+        shape = tf.shape(x) # (b, n, d)
         b = tf.cast(shape[0], tf.int32)
         n = tf.cast(shape[1], tf.int32)
-        
+
+        assert x.shape[-1] is not None, "The last dimension of x is undefined."
+
         query, key, val = self.to_q(x), self.to_k(x), self.to_v(x)
 
         # Project key and val into k-dimentional space
@@ -96,7 +96,7 @@ class MHAttention(Layer):
         mask = tf.image.resize(mask, [n, self.k_proj], method='nearest')
         mask = tf.reshape(mask, (1, 1, n, self.k_proj))
 
-        # Main attn logic: sftmx( q@k / d**0.5 ) @ v 
+        # Main attn logic: sftmx( q@k / d**0.5 ) @ v
         scores = tf.einsum('bhnd,bhkd->bhnk', query, key) / (tf.sqrt( tf.cast(self.dim_head, dtype=tf.float32) ))
         scores += (mask * -1e9) if mask is not None else 0.
         attn = tf.nn.softmax(scores, axis=-1) # (b,h,n,k_proj)
@@ -119,7 +119,7 @@ class MHAttention(Layer):
 
         scores = tf.einsum('bhnd,bhnd->bhnn', query, key) / (tf.sqrt(self.dim_head))
         scores += (mask * -1e9) if mask is not None else 0. # apply mask non-edge connections
-        attn = tf.nn.softmax(scores, axis=-1) #-1 
+        attn = tf.nn.softmax(scores, axis=-1) #-1
         attn = self.dropout(attn)
         out = tf.einsum('bhnn,bhnm->bhnd', attn, v)
 
