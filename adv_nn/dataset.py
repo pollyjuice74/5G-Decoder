@@ -75,4 +75,4 @@ def sign_to_bin(c):
 
 @staticmethod
 def llr_to_bin(c):
-    return tf.cast(c < 0, tf.int32)
+    return tf.cast(tf.greater(c, 0), tf.float32)
