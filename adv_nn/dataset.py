@@ -76,3 +76,9 @@ def sign_to_bin(c):
 @staticmethod
 def llr_to_bin(c):
     return tf.cast(tf.greater(c, 0), tf.float32)
+
+@staticmethod
+def bin_to_llr(x):
+    """ Clip llrs to 20 for numerical stability """
+    llr_vector = tf.where(x == 0, -20, 20)
+    return llr_vector
