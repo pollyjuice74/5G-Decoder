@@ -254,51 +254,82 @@ class Decoder( TransformerDiffusion ):
 
     # 'test' function
     def call(self, r_t):
-        for i in range(self.m):
-            print(r_t.shape)
-            # both (n,)
-            r_t, z_hat = self.rev_diff_call(r_t) if not self.split_diff else self.split_rdiff_call(r_t)
+        i = tf.constant(0)  # Initialize loop counter
+        z_hat = tf.zeros_like(r_t)  # Placeholder for z_hat
 
-            # Check if synd is 0 return r_t
-            if tf.reduce_sum( self.get_syndrome(r_t) ) == 0:
-                return r_t, z_hat, i
+        def condition(i, r_t, z_hat):
+            # Loop while i < self.m and syndrome sum is not zero
+            return tf.logical_and(i < 1, tf.reduce_sum(self.get_syndrome(r_t)) != 0) # CHANGE 5 TO SELF.M
 
-        return r_t, z_hat, i
+        def body(i, r_t, z_hat):
+            # Perform reverse or split diffusion
+            r_t, z_hat = tf.cond(
+                tf.logical_not(self.split_diff),
+                lambda: self.split_rdiff_call(r_t),
+                lambda: self.rev_diff_call(r_t),
+            )
+            return tf.add(i, 1), r_t, z_hat
+
+        # Run tf.while_loop with the loop variables
+        i, final_r_t, final_z_hat = tf.while_loop(
+            condition,
+            body,
+            loop_vars=[i, r_t, z_hat],
+            maximum_iterations=self.n_steps,
+            # shape_invariants=[i.get_shape(), tf.TensorShape([None, None]), z_hat.get_shape()]
+        )
+
+        return final_r_t, final_z_hat, i
+
 
     # Refines recieved codeword r at time t
     def rev_diff_call(self, r_t):
-        print("Rev def call...")
+        tf.print("Rev def call with line-search...")
         # Make sure r_t and t are compatible
         r_t = tf.reshape(r_t, (self.n, -1)) # (n,b)
         # 'time step' of diffusion is really ix of abs(sum synd errors)
         t = tf.reduce_sum( self.get_syndrome(llr_to_bin(r_t)), axis=0 ) # (m,n)@(n,b)->(m,b)->(1,b)
         t = tf.cast(tf.abs(t), dtype=tf.int32)
+        tf.print("syndromes t: ", t)
 
         # Transformer error prediction
         z_hat_crude, synd = self.tran_call(r_t, t) # (n,1), (m,1)
-        # print("z_hat_crude: ", z_hat_crude)
+        tf.print("After Transformer call: ", z_hat_crude)
 
         # Compute diffusion vars
         sigma = self.get_sigma(t) # theoretical step size
-        # print("sigma: ", sigma)
-        err_hat = r_t - tf.sign(z_hat_crude * r_t) # (n,1)
+        z_hat = r_t - tf.sign(z_hat_crude * r_t) # (n,1)
+        tf.print("sigma: ", sigma)
+        # tf.print("z_hat_crude: ", z_hat_crude)
+        tf.print("z_hat: ", z_hat)
 
-        # Refined estimate of the codeword for the ls diffusion step
-        r_t1, z_hat = self.line_search(r_t, sigma, err_hat) if self.ls_active else 1.
-        # r_t1[t==0] = r_t[t==0] # if cw has 0 synd. keep as is
+        r_t1 = r_t - z_hat_crude
+        # # Refined estimate of the codeword for the ls diffusion step
+        # r_t1, z_hat = self.line_search(r_t, sigma, err_hat) if self.ls_active else 1.
+        # tf.print("After linesearch: ", r_t1)
+
+        # Cast both outputs to float32 for consistency
+        r_t1, z_hat = [ tf.cast(tensor, tf.float32) for tensor in [r_t1, z_hat] ]
+        # # reshape to (n,b) for consistency
+        r_t1, z_hat = [ tf.reshape( tensor, (self.n, self.batch_size) )
+                                             for tensor in [r_t1, z_hat] ]
 
         return r_t1, z_hat # r at t-1, both (n,1)
 
     def split_rdiff_call(self, r_t):
-        print("Rev diff call with split diffusion...")
+        tf.print("Rev diff call with split diffusion...")
         # Ensure r_t is correctly shaped
         r_t = tf.reshape(r_t, (self.n, -1))  # (n,b)
+        print(r_t.shape)
         t = tf.reduce_sum(self.get_syndrome(llr_to_bin(r_t)), axis=0)  # (m,n)@(n,b)->(m,b)->(1,b)
         t = tf.cast(tf.abs(t), dtype=tf.int32)
 
         # First half-step condition subproblem
+        print(r_t.shape, t)
         z_hat_crude, synd = self.tran_call(r_t, t)
+        print("fc input: ", (z_hat_crude * self.get_sigma(t)).shape)
         r_t_half = r_t - 0.5 * self.fc(z_hat_crude * self.get_sigma(t))
+        print(r_t_half.shape)
 
         # Full-step diffusion subproblem
         r_t1 = r_t_half + tf.random.normal(r_t_half.shape) * tf.sqrt(self.get_sigma(t))
@@ -307,6 +338,12 @@ class Decoder( TransformerDiffusion ):
         z_hat_crude_half, synd = self.tran_call(r_t1, t)  # Reuse the second `tran_call`
         r_t1 = r_t1 - 0.5 * self.fc(z_hat_crude_half * self.get_sigma(t))
 
+        # Cast both outputs to float32 for consistency
+        r_t1, z_hat_crude_half = [ tf.cast(tensor, tf.float32) for tensor in [r_t1, z_hat_crude_half] ]
+        # # reshape to (n,b) for consistency
+        r_t1, z_hat_crude_half = [ tf.reshape( tensor, (self.n, self.batch_size) )
+                                             for tensor in [r_t1, z_hat_crude_half] ]
+        print(r_t1.shape, z_hat_crude_half.shape)
         return r_t1, z_hat_crude_half  # r at t-1, both (n,1)
         
 # Construct generator (encoder using forward diffusion to simulate channel)
