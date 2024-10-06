@@ -196,9 +196,9 @@ class TransformerDiffusion( Layer ):
         z = tf.random.normal(c_0.shape)
         h = np.random.rayleigh(size=c_0.shape)if sim_ampl else 1.
 
-        added noise to codeword
+        # added noise to codeword
         c_t = tf.transpose(h * c_0 + struct_noise + (z*noise_factor))
-        calculate sum of syndrome
+        # calculate sum of syndrome
         t = tf.math.reduce_sum( self.get_syndrome( llr_to_bin(tf.sign(c_t)) ), axis=0 ) # (batch_size, 1)
 
         z_hat = self.tran_call(c_t, t) # model prediction
