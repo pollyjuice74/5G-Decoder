@@ -23,7 +23,7 @@ It got 0 Bit Error Rate (decoded all errors) for EbNos between 5-13dB (5 is more
 
 These results can be found on the `LTD_model_reg_LDPC.ipynb` notebook.
 
-The relative time it decodes on a Google Colab TPU was 100 vectors of size (121,) with a parity check matrix of size (121,44) at 60 seconds. 
+**Previous Results:** The relative time it decodes on a Google Colab TPU was 100 vectors of size (121,) with a parity check matrix of size (121,44) at 60 seconds. 
 
 These results can be found on the `notebooks/LinearTranDiff.ipynb` notebook.
 
