@@ -1,6 +1,6 @@
 import numpy as np
 
-
+# Author: Nvidia
 def generate_pruned_pcm_5g(decoder, n, verbose=True):
     """Utility function to get the pruned parity-check matrix of the 5G code.
 
