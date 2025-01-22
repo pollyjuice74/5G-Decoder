@@ -8,7 +8,7 @@ This work introduces a novel, fully differentiable linear-time complexity transf
 
 ## Structure of this repository
 
-- `LTD_model_5GLDPC.ipynb` running Decoder on 5G LDPC codes.
+- `LTD_model_5G_LDPC.ipynb` running Decoder on 5G LDPC codes.
 
 In `src/` folder: 
   
