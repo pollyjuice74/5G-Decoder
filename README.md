@@ -16,7 +16,7 @@ In `src/` folder:
 - `decoder5G.py` decoder model for 5G LDPC codes.
 - `e2e_model.py` end-to-end channel between Encoder and Decoder.
 - `args.py` class holding arguments for the models and training.
-- `utils.py` train/test functions for transformer models.
-- `utils5G.py` train/test functions for transformer models.
+- `utils.py` save, load, train/test functions for transformer models.
+- `utils5G.py` 5G pcm pruning function.
 - `time_comparison.py` comparison and plotting functions to evaluate speed of models.
 
