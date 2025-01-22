@@ -63,8 +63,8 @@ class LinearMHAttention( Layer ):
         self.proj_k = None
         self.proj_v = None
 
-        self.to_q, self.to_k, self.to_v = [ Dense(self.dims, use_bias=False) for _ in range(3) ]
-        self.to_out = Dense(self.dims)
+        self.to_q, self.to_k, self.to_v = [ Dense(self.dims, use_bias=False, activation='gelu') for _ in range(3) ]
+        self.to_out = Dense(self.dims, activation='gelu')
         self.dropout = Dropout(dropout) # to d-dimentional embeddings
 
     def build(self, input_shape):
@@ -182,12 +182,12 @@ class TransformerEncoderBlock(tf.keras.layers.Layer):
                                     dropout=dropout_rate)
         )
         self.ffn = tf.keras.Sequential([
-            Dense(d_ff, activation='relu'),
+            Dense(d_ff, activation='gelu'),
             Dense(d_model),
         ])
 
-        self.layernorm1 = LayerNormalization(epsilon=1e-6)
-        self.layernorm2 = LayerNormalization(epsilon=1e-6)
+        self.layernorm1 = LayerNormalization()
+        self.layernorm2 = LayerNormalization()
 
         self.dropout1 = Dropout(dropout_rate)
         self.dropout2 = Dropout(dropout_rate)
@@ -279,7 +279,7 @@ class Decoder( Layer ):
                 plt.imshow(matrix, cmap='viridis'); plt.colorbar(); plt.title(title); plt.show()
 
         # layers
-        self.node_embeddings = Dense(self.dims)
+        self.node_embeddings = Dense(self.dims, activation='gelu')
         self.encoder_blocks = [
             TransformerEncoderBlock(
                 d_model=args.d_model,
@@ -294,7 +294,7 @@ class Decoder( Layer ):
         ]
         self.forward_channel = Dense(1)
         self.dropout = Dropout(dropout_rate)
-        self.to_n = Dense(self._n)
+        self.to_n = Dense(self._n, activation='gelu')
 
     def create_mask(self, H):
         """Create an attention mask based on the parity-check matrix (PCM)."""
@@ -336,10 +336,10 @@ class Decoder( Layer ):
     def call(self, x_nodes, training=False):
         """Perform a forward pass through the decoder to generate variable node logits."""
         # Embed cn/vn nodes vector
-        x_nodes_embedded = self.node_embeddings( x_nodes ) # (b, n+m, hidden_dims)
+        x_nodes = self.node_embeddings( x_nodes ) # (b, n+m, hidden_dims)
         # Pass through each encoder block
         for block in self.encoder_blocks:
-            x_nodes = block(x_nodes_embedded,
+            x_nodes = block(x_nodes,
                             mask=self.mask,
                             training=training)
         x_nodes = tf.squeeze( self.forward_channel(x_nodes), axis=-1 ) # (b, n+m, hidden_dims)->(b, n+m)
