@@ -1,4 +1,6 @@
 # 5G LDPC Linear Transformer for Channel Decoding
+Uploaded on _arxiv_.
+
 Implementation of the linear transformer-based decoder experiments from
 [*5G LDPC Linear Transformer for Channel Decoding*](link) using the
 [Sionna link-level simulator](https://nvlabs.github.io/sionna/).
