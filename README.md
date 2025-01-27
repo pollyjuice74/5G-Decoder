@@ -22,6 +22,15 @@ In `src/` folder:
 - `time_comparison.py` comparison and plotting functions to evaluate speed of models.
 
 
+## References
+
+[A] [M. Hernandez, F. Pinero, "5G LDPC Linear Transformer for Channel Decoding", 2025]()
+
+[B] [S. Cammerer, J. Hoydis, F. Aït Aoudia, and A. Keller, "Graph Neural Networks for Channel Decoding", 2022](https://arxiv.org/pdf/2207.14742.pdf)
+
+[C] [Yoni Choukroun, Lior Wolf, "Error Correction Code Transformer", 2022](https://arxiv.org/abs/2203.14966)
+
+
 ## License
 
 © 2025 Mario Hernandez Torres.
