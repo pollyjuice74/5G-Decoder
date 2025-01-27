@@ -21,3 +21,9 @@ In `src/` folder:
 - `utils5G.py` 5G pcm pruning function.
 - `time_comparison.py` comparison and plotting functions to evaluate speed of models.
 
+
+## License
+
+© 2025 Mario Hernandez Torres.
+This project is licensed under the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).  
+Distributed on an "AS IS" basis, without warranties or conditions of any kind. 
