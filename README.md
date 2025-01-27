@@ -1,5 +1,4 @@
 # 5G LDPC Linear Transformer for Channel Decoding
-Uploaded on _arxiv_.
 
 Implementation of the linear transformer-based decoder experiments from
 [*5G LDPC Linear Transformer for Channel Decoding*](https://arxiv.org/abs/2501.14102) using the
