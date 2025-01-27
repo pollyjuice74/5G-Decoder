@@ -2,7 +2,7 @@
 Uploaded on _arxiv_.
 
 Implementation of the linear transformer-based decoder experiments from
-[*5G LDPC Linear Transformer for Channel Decoding*](link) using the
+[*5G LDPC Linear Transformer for Channel Decoding*](https://arxiv.org/abs/2501.14102) using the
 [Sionna link-level simulator](https://nvlabs.github.io/sionna/).
 
 ## Abstract
